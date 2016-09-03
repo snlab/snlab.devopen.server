@@ -1,0 +1,29 @@
+{
+  "name": "snlab.devopen.server",
+  "description": "A pre-load plugin for DevOpen IDE (and, in turn, Cloud9 IDE).",
+  "author": "SNLab",
+  "contributors": [
+    {
+      "name": "J. Jensen Zhang",
+      "email": "jingxuan.n.zhang@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/snlab/snlab.devopen.server.git"
+  },
+  "plugins": {
+    "managerd": {}
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.x",
+    "sqlite3": "^3.x"
+  },
+  "categories": [
+    "miscellaneous"
+  ],
+  "licenses": [
+    "MIT"
+  ]
+}
