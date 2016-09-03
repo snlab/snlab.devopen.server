@@ -6,6 +6,12 @@ var fuuid = require('./fast-uuid.js');
 
 var app = express();
 app.use(bodyParser.json());
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin, Accept, X-Requested-With, Content-Type, Access-Controller-Requested-Method, Accept-Control-Request-Headers");
+  next();
+});
 
 module.exports = function(store, port) {
   var db = new sqlite3.Database(store);
