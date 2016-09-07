@@ -1,27 +1,45 @@
 var fs = require('fs');
 var bodyParser = require('../../node_modules/body-parser');
 var express = require('../../node_modules/express');
+var http = require('http');
 var sqlite3 = require('../../node_modules/sqlite3');
-var fuuid = require('./fast-uuid.js');
+var fuuid = require('./fast-uuid');
+
+var test = require('./lib/test');
 
 var app = express();
-app.use(bodyParser.json());
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-  res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin, Accept, X-Requested-With, Content-Type, Access-Controller-Requested-Method, Accept-Control-Request-Headers");
-  next();
-});
+var server = http.createServer(app);
 
 module.exports = function(controller, port) {
+  var cfg = controller;
+
+  app.use(express.static(__dirname + '/public_html'));
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+
   app.get('/', function(req, res) {
-    res.status(200).send(JSON.stringify(controller));
+    res.writeHead(302, {Location: '/index.html'});
+    res.end();
   });
 
-  app.port = port || 9090;
-  app.listen(port, function() {
+  // Function Management
+  app.get('/test/fast/function', test.fast.getAllFunction);
+  app.get('/test/fast/function/:uuid', test.fast.getFunction);
+  app.delete('/test/fast/function/:uuid', test.fast.deleteFunction);
+  // Function Instance Management
+  app.get('/test/fast/instance', test.fast.getAllInstance);
+  app.get('/test/fast/instance/:uuid', test.fast.getInstance);
+  app.post('/test/fast/instance', test.fast.submitInstance);
+  app.delete('/test/fast/instance/:uuid', test.fast.deleteInstance);
+  // Dependency Track
+  app.get('/test/fast/dependency/precedence', test.fast.getPrecedence);
+  app.get('/test/fast/dependency/access', test.fast.getAllAccessGraph);
+  app.get('/test/fast/dependency/access/:uuid', test.fast.getAccessGraph);
+
+  server.port = port || 9090;
+  server.listen(port, function() {
     console.log('Controller UI listening on ', port);
     console.log('Controller Info: ', controller);
   });
-  return app;
+  return server;
 }
