@@ -5,13 +5,14 @@ var http = require('http');
 var sqlite3 = require('../../node_modules/sqlite3');
 var fuuid = require('./fast-uuid');
 
-var test = require('./lib/test');
+var lib_api = require('./lib/test');
 
 var app = express();
 var server = http.createServer(app);
 
 module.exports = function(controller, port) {
   var cfg = controller;
+  var api = lib_api(cfg);
 
   app.use(express.static(__dirname + '/public_html'));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,19 +23,21 @@ module.exports = function(controller, port) {
     res.end();
   });
 
+  // Basic Controller Information
+  app.get('/test/info', api.info);
   // Function Management
-  app.get('/test/fast/function', test.fast.getAllFunction);
-  app.get('/test/fast/function/:uuid', test.fast.getFunction);
-  app.delete('/test/fast/function/:uuid', test.fast.deleteFunction);
+  app.get('/test/fast/function', api.fast.getAllFunction);
+  app.get('/test/fast/function/:uuid', api.fast.getFunction);
+  app.delete('/test/fast/function/:uuid', api.fast.deleteFunction);
   // Function Instance Management
-  app.get('/test/fast/instance', test.fast.getAllInstance);
-  app.get('/test/fast/instance/:uuid', test.fast.getInstance);
-  app.post('/test/fast/instance', test.fast.submitInstance);
-  app.delete('/test/fast/instance/:uuid', test.fast.deleteInstance);
+  app.get('/test/fast/instance', api.fast.getAllInstance);
+  app.get('/test/fast/instance/:uuid', api.fast.getInstance);
+  app.post('/test/fast/instance', api.fast.submitInstance);
+  app.delete('/test/fast/instance/:uuid', api.fast.deleteInstance);
   // Dependency Track
-  app.get('/test/fast/dependency/precedence', test.fast.getPrecedence);
-  app.get('/test/fast/dependency/access', test.fast.getAllAccessGraph);
-  app.get('/test/fast/dependency/access/:uuid', test.fast.getAccessGraph);
+  app.get('/test/fast/dependency/precedence', api.fast.getPrecedence);
+  app.get('/test/fast/dependency/access', api.fast.getAllAccessGraph);
+  app.get('/test/fast/dependency/access/:uuid', api.fast.getAccessGraph);
 
   server.port = port || 9090;
   server.listen(port, function() {
