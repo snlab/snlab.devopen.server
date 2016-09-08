@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="May">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+
+    <title>Access Graph</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/ctrlhome.css" rel="stylesheet">
+
+    <!--D3 lib-->
+    <script src="js/d3.min.js" charset="utf-8"></script>
+    <script src="js/cytoscape.min.js"></script>
+    <script src="js/dagre.js"></script>
+    <script src="js/cytoscape-dagre.js"></script>
+
+    <style>
+      #cy {
+        height:0px;
+        padding-bottom:45%
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="#" style="font-weight: bold">FAST <span class="sr-only"></span></a></li>
+            <li><a href="precedence-graph.html">Dependency Tracking</a></li>
+            <li><a href="fast-function.html">FAST functions</a></li>
+            <li><a href="fast-function-instance.html">FAST function instances</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="" style="font-weight: bold">Maple<span class="sr-only"></span></a></li>
+            <li><a href="">Maple functions</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="controller-info.html" style="font-weight: bold">Controller management<span class="sr-only"></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h2 class="sub-header">Dependency Tracking</h2>
+          <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+            <div class="btn-group">
+              <div class="btn-group">
+                <a href="precedence-graph.html" class="btn btn-primary">Precedence graph</a>
+                <a href="access-graph.html" class="btn btn-primary active">Access graph</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4"></div>
+          </div>
+          <div class="row" id="cy">
+          </div>
+          </div>
+        </div>
+      </div>
+      <script src="js/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')</script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/d3.min.js" charset="utf-8"></script>
+<script>
+    //get data
+    // d3.json("http://192.168.1.229:8181/restconf/operational/fast-system:access-graph/")
+    // d3.json("http://192.168.1.229:8181/restconf/operational/fast-system:access-graph/")
+    //         .header("Authorization","Basic " + btoa("admin:admin"))
+    //         .get( function(error, data) {
+
+                var accessData = {"access-graph":{
+                  "access-node":[
+                    {
+                    "id":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:01]]]]}",
+                    "type":"iid"},
+                    {"id":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]]]}",
+                    "type":"iid"},
+                    {"id":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:0b]]]]}",
+                    "type":"iid"},
+                    {"id":"req0","type":"function"}],
+                  "access-link":[
+                    {"link-id":"req0->KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:01]]]]}",
+                    "source":"req0",
+                    "target":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:01]]]]}"},
+                    {"link-id":"req0->KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]]]}",
+                    "source":"req0",
+                    "target":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]]]}"},{"link-id":"req0->KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:0b]]]]}","source":"req0","target":"KeyedInstanceIdentifier{targetType=interface org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node, path=[org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology, org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology[key=TopologyKey [_topologyId=Uri [_value=flow:1]]], org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node[key=NodeKey [_nodeId=Uri [_value=host:12:34:56:78:00:0b]]]]}"}]}}
+
+                function accessGraph(data) {
+                // if (error) throw error;
+                var nodes = [];
+                var links = [];
+                // var nodesSimplify = {};
+                var nodeMap = [];
+                var linksSimplify = {};
+                var graph = data['access-graph'];
+                if (graph['access-node']) {
+                  graph['access-node'].forEach(function (node,i) {
+                    nodeMap[node.id] = "node" + i;
+                  });
+                }
+                if(graph['access-link'] != undefined) {
+                    graph['access-link'].forEach(function (link) {
+                        nodes.push({group: "nodes", classes: 'function', data: {id: nodeMap[nodes.id]}});
+                        nodes.push({group: "nodes", classes: 'iid', data: {id: nodeMap[nodes.id]}});
+                        links.push({
+                            group: "edges", class: 'relation',
+                            data: {
+                                source: nodeMap[link['source']],
+                                target: nodeMap[link['target']]
+                            }
+                        })
+                      });
+                }
+
+                var cy = window.cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    boxSelectionEnabled: false,
+                    autounselectify: true,
+                    layout: {
+                        name: 'dagre'
+                    },
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'content': 'data(id)',
+                                'text-opacity': 0.5,
+                                'text-valign': 'center',
+                                'text-halign': 'right',
+                                'background-color': '#11479e'
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 4,
+                                'target-arrow-shape': 'triangle',
+                                'line-color': '#9dbaea',
+                                'target-arrow-color': '#9dbaea'
+                            }
+                        },
+                        {
+                            selector: '.iid',
+                            style: {
+                                'shape':'rectangle',
+                                'background-color': '#11479e'
+                            }
+                        }
+                    ],
+                    elements: {
+                        nodes: nodes,
+                        edges: links
+                    }
+                  });
+                 }
+              // });
+
+              accessGraph(accessData);
+    </script>
+
+  </body>

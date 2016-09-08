@@ -1,0 +1,75 @@
+
+
+.easypiechart-panel {
+	text-align: center;
+	padding: 1px 0;
+	margin-bottom: 20px;
+}
+
+
+.easypiechart {
+	position: relative;
+	text-align: center;
+	width: 120px;
+	height: 120px;
+	margin: 20px auto 10px auto;
+}
+
+.easypiechart .percent {
+	display: block;
+	position: absolute;
+	font-size: 26px;
+	top: 38px;
+	width: 120px;
+}
+
+.panel-default .panel-heading {
+	background: #fff;
+	border-bottom: 1px solid #eee;
+	color: #5f6468;
+}
+
+#pie-executed .percent { color: #30a5ff;}
+#pie-executing .percent { color: #1ebfae;}
+#pie-nonexecuted .percent { color: #ffb53e;}
+#pie-failed .percent { color: #ef4040;}
+
+
+
+.table {
+	background: #fff;
+}
+
+.fixed-table-container {
+	border: 1px solid #eee;
+}
+
+.fixed-table-container thead th {
+	background: #f7f7f8;
+	border-color: #ddd;
+	color: #5f6468;
+	font-weight: 300;
+	font-size: 16px;
+}
+
+.fixed-table-container tbody td {
+	border: 1px solid #eee;
+}
+
+.fixed-table-container tbody td:last-child {
+	border-right: none;
+}
+
+.table>thead>tr>th {
+	border-bottom: 1px solid #e6e7e8;
+	vertical-align: middle;
+	height: 50px;
+}
+
+.fixed-table-pagination .pagination {
+	margin-top: 10px;
+	margin-bottom: 0px;
+}
+.fixed-table-pagination .pagination-detail {
+	margin-top: 20px;
+}
