@@ -3,6 +3,7 @@ var bodyParser = require('../../node_modules/body-parser');
 var express = require('../../node_modules/express');
 var http = require('http');
 var sqlite3 = require('../../node_modules/sqlite3');
+var Client = require('../../node_modules/ssh2').Client;
 var fuuid = require('./fast-uuid.js');
 
 var portalApp = require('./portalApp.js');
@@ -74,7 +75,7 @@ module.exports = function(store, port) {
       }
       rows.forEach(function(e) {
         if (!cacheList[e.uuid]) {
-          cacheList[e.uuid] = {status: {ssh: false, activate: false}};
+          cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
         }
         cacheList[e.uuid].name = e.name;
         cacheList[e.uuid].ip = e.ip;
@@ -83,7 +84,6 @@ module.exports = function(store, port) {
         cacheList[e.uuid].login = e.login;
         cacheList[e.uuid].password = e.password;
       });
-      checkSSHStatus();
       console.log("GET controllers:", rows);
       console.log("Cache List:", cacheList);
       res.status(200).json(rows);
@@ -109,7 +109,7 @@ module.exports = function(store, port) {
              cacheList[uuid] = {uuid: uuid, name: name, sshPort: sshPort,
                                 restPort: restPort, login: login,
                                 password: password,
-                                status: {ssh: false, activate: false}};
+                                status: {ssh: "unknown", activate: false}};
              console.log("POST controller:", cacheList[uuid]);
              res.status(200).json({uuid: uuid});
            }
@@ -227,6 +227,55 @@ module.exports = function(store, port) {
       return;
     }
     res.status(404).json({message: "No such controller or controller is not activate"});
+  });
+
+  app.get('/testssh/:uuid', function(req, res) {
+    var uuid = req.params.uuid;
+    var controller = cacheList[uuid];
+    if (controller) {
+      var sshTest = new Client();
+      console.log('New Client');
+      sshTest.on('ready', function() {
+        console.log('Client :: ready');
+        var noerr = true;
+        sshTest.shell(function(err, stream) {
+          console.log('Start Shell Mode');
+          stream.on('close', function() {
+            console.log('Stream Closed: ', noerr);
+            if (noerr)
+              res.status(200).json({status: true});
+            sshTest.end();
+          });
+          if (err) {
+            console.log('Shell Error: ', err);
+            noerr = false;
+            res.status(400).json({message: err, status: false});
+            stream.close();
+          };
+          console.log('Execute Shell Command');
+          stream.end('exit\n');
+        });
+      }).on('error', function(err) {
+        console.log('Connection Error: ', err);
+        if (err) {
+          res.status(400).json({message: err, status: false});
+          sshTest.end();
+        };
+      }).connect({
+          host: controller.ip,
+          port: controller.sshPort,
+          username: controller.login,
+          password: controller.password,
+          algorithms: {
+            serverHostKey: [
+              'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384',
+              'ecdsa-sha2-nistp521', 'ssh-dss'
+            ]
+          }
+      });
+    } else {
+      res.status(404).json({message: "No such controller"});
+    }
   });
 
   port = port || 3000;

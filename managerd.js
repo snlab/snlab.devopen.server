@@ -26,6 +26,7 @@ define(function(require, exports, module) {
       loaded = true;
 
       startServer();
+      return loaded;
     }
 
     /***** Methods *****/
