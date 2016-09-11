@@ -73,7 +73,7 @@ module.exports = function(store, port) {
         res.status(400).json({message: err});
         return;
       }
-      rows.forEach(function(e) {
+      rows.forEach(function(e, i) {
         if (!cacheList[e.uuid]) {
           cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
         }
@@ -83,6 +83,7 @@ module.exports = function(store, port) {
         cacheList[e.uuid].restPort = e.restPort;
         cacheList[e.uuid].login = e.login;
         cacheList[e.uuid].password = e.password;
+        rows[i].status = cacheList[e.uuid].status;
       });
       console.log("GET controllers:", rows);
       console.log("Cache List:", cacheList);
@@ -233,50 +234,62 @@ module.exports = function(store, port) {
     var uuid = req.params.uuid;
     var controller = cacheList[uuid];
     if (controller) {
-      var sshTest = new Client();
-      console.log('New Client');
-      sshTest.on('ready', function() {
-        console.log('Client :: ready');
-        var noerr = true;
-        sshTest.shell(function(err, stream) {
-          console.log('Start Shell Mode');
-          stream.on('close', function() {
-            console.log('Stream Closed: ', noerr);
-            if (noerr)
-              res.status(200).json({status: true});
-            sshTest.end();
-          });
-          if (err) {
-            console.log('Shell Error: ', err);
-            noerr = false;
-            res.status(400).json({message: err, status: false});
-            stream.close();
-          };
-          console.log('Execute Shell Command');
-          stream.end('exit\n');
-        });
-      }).on('error', function(err) {
-        console.log('Connection Error: ', err);
-        if (err) {
-          res.status(400).json({message: err, status: false});
-          sshTest.end();
-        };
-      }).connect({
-          host: controller.ip,
-          port: controller.sshPort,
-          username: controller.login,
-          password: controller.password,
-          algorithms: {
-            serverHostKey: [
-              'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384',
-              'ecdsa-sha2-nistp521', 'ssh-dss'
-            ]
-          }
-      });
+      testSSHStatus(controller, res);
     } else {
       res.status(404).json({message: "No such controller"});
     }
   });
+
+  app.post('/testssh', function(req, res) {
+    var controller = {
+      ip: req.body && req.body.ip || '127.0.0.1',
+      sshPort: req.body && req.body.sshPort || 8101,
+      login: req.body && req.body.login || 'karaf',
+      password: req.body && req.body.password || 'karaf'
+    };
+    testSSHStatus(controller, res);
+  });
+
+  /***** Methods *****/
+
+  function testSSHStatus(controller, res) {
+    var sshTest = new Client();
+    sshTest.on('ready', function() {
+      var noerr = true;
+      sshTest.shell(function(err, stream) {
+        stream.on('close', function() {
+          if (noerr)
+            console.log("SSH test successfully!");
+            res.status(200).json({status: "connect"});
+          sshTest.end();
+        }).on('data', function() {});
+        if (err) {
+          noerr = false;
+          console.log("Stream error, disconnect");
+          res.status(200).json({message: err, status: "disconnect"});
+          stream.close();
+        };
+        stream.end('exit\n');
+      });
+    }).on('error', function(err) {
+      if (err) {
+        console.log("Connection error, disconnect");
+        res.status(200).json({message: err, status: "disconnect"});
+        sshTest.end();
+      };
+    }).connect({
+      host: controller.ip,
+      port: controller.sshPort,
+      username: controller.login,
+      password: controller.password,
+      algorithms: {
+        serverHostKey: [
+          'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384',
+          'ecdsa-sha2-nistp521', 'ssh-dss'
+        ]
+      }
+    });
+  }
 
   port = port || 3000;
 
