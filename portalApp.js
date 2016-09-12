@@ -45,4 +45,4 @@ module.exports = function(controller, port) {
     console.log('Controller Info: ', controller);
   });
   return server;
-}
+};

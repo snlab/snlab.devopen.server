@@ -30,69 +30,104 @@
           </ul>
           <ul class="nav nav-sidebar">
             <li><a href="" style="font-weight: bold">Maple<span class="sr-only"></span></a></li>
-            <li><a href="maple-function.ht">Maple functions</a></li>
+            <li><a href="">Maple functions</a></li>
           </ul>
           <ul class="nav nav-sidebar">
-            <li><a href="controller-info.html" style="font-weight: bold">Controller management<span class="sr-only"></a></li>
+            <li><a href="controller-info.html" style="font-weight: bold">Controller Information<span class="sr-only"></a></li>
           </ul>
         </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      </div>
 
-          <h2 class="sub-header">FAST functions</h2>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Function Id</th>
-                  <th>Function</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,001</td>
-                  <td>Lorem</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,002</td>
-                  <td>amet</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,003</td>
-                  <td>Integer</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,013</td>
-                  <td>torquent</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,014</td>
-                  <td>per</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" aria-label="..."></td>
-                  <td>1,015</td>
-                  <td>sodales</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <div class="row">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h4 class="sub-header">Precedence Graph</h4>
           <div class="row">
             <div class="col-md-4"></div>
             <div class="col-md-4">
-              <button type="button" class="btn btn-info">Add FAST function</button>
-              <button type="button" class="btn btn-danger">Delete</button>
+            <div class="btn-group">
+              <div class="btn-group">
+                <a href="precedence-graph.html" class="btn btn-primary active">Precedence graph</a>
+                <a href="access-graph.html" class="btn btn-primary">Access graph</a>
+              </div>
             </div>
-            <div class="col-md-4"></div>
+          </div>
+          <div class="col-md-4"></div>
+          </div>
+          <div class="row" id="cy">
           </div>
           </div>
         </div>
       </div>
-    </div>
+      <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <script src="js/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')</script>
+      <script src="js/bootstrap.min.js"></script>
+      <script src="js/d3.min.js" charset="utf-8"></script>
+      <script>
+        //get data
+        d3.json("http://192.168.1.229:8181/restconf/operational/fast-system:precedence-graph/")
+                .header("Authorization","Basic " + btoa("admin:admin"))
+                .get( function(error, data) {
+                  if (error) throw error;
 
+                  var nodes = [];
+                  var links = [];
+
+                  var graph = data['precedence-graph'];
+                  if(graph.node != undefined) {
+                    graph.node.forEach(function (node) {
+                      nodes.push({group: "nodes", classes: 'function', data: {id: node['instance-id']}});
+                    });
+                  }
+
+                  if(graph.link != undefined) {
+                    graph.link.forEach(function (link) {
+                      links.push({
+                        group: "edges", class: 'relation',
+                        data: {
+                          source: link['source'],
+                          target: link['target']
+                        }
+                      })
+                    });
+                  }
+
+                  var cy = window.cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    boxSelectionEnabled: false,
+                    autounselectify: true,
+                    layout: {
+                      name: 'dagre'
+                    },
+
+                    style: [
+                      {
+                        selector: 'node',
+                        style: {
+                          'content': 'data(id)',
+                          'text-opacity': 0.5,
+                          'text-valign': 'center',
+                          'text-halign': 'right',
+                          'background-color': '#11479e'
+                        }
+                      },
+                      {
+                        selector: 'edge',
+                        style: {
+                          'width': 4,
+                          'target-arrow-shape': 'triangle',
+                          'line-color': '#9dbaea',
+                          'target-arrow-color': '#9dbaea'
+                        }
+                      },
+                    ],
+                    elements: {
+                      nodes: nodes,
+                      edges: links
+                    }
+                  });
+                });
+      </script>
   </body>

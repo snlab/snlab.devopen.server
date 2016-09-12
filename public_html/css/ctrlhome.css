@@ -14,7 +14,7 @@
 
 .sub-header {
   padding-bottom: 15px;
-  margin-bottom: 70px;
+  margin-bottom: 30px;
   border-bottom: 1px solid #eee;
 }
 
@@ -51,11 +51,16 @@
   }
 }
 
+.nav {
+  font-size:5px;
+}
+
 /* Sidebar navigation */
 .nav-sidebar {
   margin-right: -21px; /* 20px padding + 1px border */
   margin-bottom: 20px;
   margin-left: -20px;
+
 }
 .nav-sidebar > li > a {
   padding-right: 20px;
@@ -78,8 +83,8 @@
 }
 @media (min-width: 768px) {
   .main {
-    padding-right: 80px;
-    padding-left: 80px;
+    padding-right: 30px;
+    padding-left: 30px;
     padding-bottom: 80px;
   }
 }
@@ -94,13 +99,19 @@
 .btn-info{
   margin-left: 20px;
   margin-right: 20px;
+  /*font-size:5px;*/
 }
 .btn-danger{
   margin-left: 20px;
   margin-right: 20px;
+  /*font-size:5px;*/
+}
+.btn-primary{
+  /*font-size:5px;*/
 }
 .btn-group{
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  font-size:5px;
 }
 
 

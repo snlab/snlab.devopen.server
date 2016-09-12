@@ -35,14 +35,15 @@
             <li><a href="">Maple functions</a></li>
           </ul>
           <ul class="nav nav-sidebar">
-            <li><a href="controller-info.html" style="font-weight: bold">Controller management<span class="sr-only"></a></li>
+            <li><a href="controller-info.html" style="font-weight: bold">Controller Information<span class="sr-only"></a></li>
           </ul>
         </div>
         </div>
 
 
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h2 class="sub-header">FAST function instances</h2>
+        <h4 class="sub-header">FAST function instances</h4>
+        <!-- <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"> -->
         <div class="panel-body table-responsive">
           <table id="table" data-toggle="table" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-select-item-name="toolbar1" data-pagination="true" data-sort-name="name" data-sort-order="desc">
             <thead>
@@ -63,6 +64,57 @@
 
       </div>
     </div>
+
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">Submit</button>
+        <button type="button" class="btn btn-danger">Delete</button>
+      <div class="col-md-4"></div>
+    </div>
+
+    <div class="bd-example">
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title" id="exampleModalLabel">Add new FAST function instance</h4>
+           </div>
+     <div class="modal-body">
+       <form>
+         <div class="form-group">
+           <label for="invoke" class="form-control-label">Invoke:</label>
+             <input type="text" class="form-control" id="recipient-name">
+         </div>
+         <div class="form-group">
+           <label for="parameters" class="form-control-label">Parameters:</label>
+             <input type="text" class="form-control" id="recipient-name">
+         </div>
+         <div class="form-group">
+           <label for="precedence" class="form-control-label">Precedence:</label>
+           <input type="text" class="form-control" id="recipient-name">
+         </div>
+         <div class="form-group">
+           <label for="groupid" class="form-control-label">Group-ID:</label>
+           <input type="text" class="form-control" id="recipient-name">
+         </div>
+       </form>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn btn-success" data-dismiss="modal">Submit</button>
+       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+     </div>
+   </div>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div>
+</div>
 
     <script src="js/jquery.min.js"></script>
     <!-- <script src="js/easypiechart.js"></script> -->
