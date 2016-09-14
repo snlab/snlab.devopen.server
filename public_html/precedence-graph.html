@@ -24,10 +24,10 @@
     <script src="js/cytoscape-dagre.js"></script>
 
     <style>
-      #cy {
-        height:0px;
-        padding-bottom:45%
-      }
+     #cy {
+       height:0px;
+       padding-bottom:45%
+     }
     </style>
   </head>
 
@@ -57,90 +57,90 @@
           <div class="row">
             <div class="col-md-4"></div>
             <div class="col-md-4">
-            <div class="btn-group">
               <div class="btn-group">
-                <a href="precedence-graph.html" class="btn btn-primary active">Precedence graph</a>
-                <a href="access-graph.html" class="btn btn-primary">Access graph</a>
+                <div class="btn-group">
+                  <a href="precedence-graph.html" class="btn btn-primary active">Precedence graph</a>
+                  <a href="access-graph.html" class="btn btn-primary">Access graph</a>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-4"></div>
+            <div class="col-md-4"></div>
           </div>
           <div class="row" id="cy">
           </div>
-          </div>
         </div>
       </div>
-      <!-- Bootstrap core JavaScript
-      ================================================== -->
-      <!-- Placed at the end of the document so the pages load faster -->
-      <script src="js/jquery.min.js"></script>
-      <script>window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')</script>
-      <script src="js/bootstrap.min.js"></script>
-      <script src="js/d3.min.js" charset="utf-8"></script>
-      <script>
-        //get data
-        d3.json("http://192.168.1.229:8181/restconf/operational/fast-system:precedence-graph/")
-                .header("Authorization","Basic " + btoa("admin:admin"))
-                .get( function(error, data) {
-                  if (error) throw error;
+    </div>
+    <!-- Bootstrap core JavaScript
+         ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/d3.min.js" charset="utf-8"></script>
+    <script>
+     var endpoint = location.protocol + "//" + location.host + "/test";
+     //get data
+     d3.json(endpoint + '/fast/precedence')
+       .get( function(error, graph) {
+         if (error) throw error;
 
-                  var nodes = [];
-                  var links = [];
+         var nodes = [];
+         var links = [];
 
-                  var graph = data['precedence-graph'];
-                  if(graph.node != undefined) {
-                    graph.node.forEach(function (node) {
-                      nodes.push({group: "nodes", classes: 'function', data: {id: node['instance-id']}});
-                    });
-                  }
+         if (graph.nodes) {
+           graph.nodes.forEach(function (node) {
+             nodes.push({group: "nodes", classes: 'function', data: {id: node}});
+           });
+         }
 
-                  if(graph.link != undefined) {
-                    graph.link.forEach(function (link) {
-                      links.push({
-                        group: "edges", class: 'relation',
-                        data: {
-                          source: link['source'],
-                          target: link['target']
-                        }
-                      })
-                    });
-                  }
+         if (graph.links) {
+           graph.links.forEach(function (link) {
+             links.push({
+               group: "edges", class: 'relation',
+               data: {
+                 source: link['source'],
+                 target: link['target']
+               }
+             })
+           });
+         }
 
-                  var cy = window.cy = cytoscape({
-                    container: document.getElementById('cy'),
-                    boxSelectionEnabled: false,
-                    autounselectify: true,
-                    layout: {
-                      name: 'dagre'
-                    },
+         var cy = window.cy = cytoscape({
+           container: document.getElementById('cy'),
+           boxSelectionEnabled: false,
+           autounselectify: true,
+           layout: {
+             name: 'dagre'
+           },
 
-                    style: [
-                      {
-                        selector: 'node',
-                        style: {
-                          'content': 'data(id)',
-                          'text-opacity': 0.5,
-                          'text-valign': 'center',
-                          'text-halign': 'right',
-                          'background-color': '#11479e'
-                        }
-                      },
-                      {
-                        selector: 'edge',
-                        style: {
-                          'width': 4,
-                          'target-arrow-shape': 'triangle',
-                          'line-color': '#9dbaea',
-                          'target-arrow-color': '#9dbaea'
-                        }
-                      },
-                    ],
-                    elements: {
-                      nodes: nodes,
-                      edges: links
-                    }
-                  });
-                });
-      </script>
+           style: [
+             {
+               selector: 'node',
+               style: {
+                 'content': 'data(id)',
+                 'text-opacity': 0.5,
+                 'text-valign': 'center',
+                 'text-halign': 'right',
+                 'background-color': '#11479e'
+               }
+             },
+             {
+               selector: 'edge',
+               style: {
+                 'width': 4,
+                 'target-arrow-shape': 'triangle',
+                 'line-color': '#9dbaea',
+                 'target-arrow-color': '#9dbaea'
+               }
+             },
+           ],
+           elements: {
+             nodes: nodes,
+             edges: links
+           }
+         });
+       });
+    </script>
   </body>
+</html>

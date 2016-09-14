@@ -35,12 +35,12 @@ module.exports = function(controller, port) {
   app.post('/test/fast/instance', api.fast.submitInstance);
   app.delete('/test/fast/instance/:uuid', api.fast.deleteInstance);
   // Dependency Track
-  app.get('/test/fast/dependency/precedence', api.fast.getPrecedence);
-  app.get('/test/fast/dependency/access', api.fast.getAllAccessGraph);
-  app.get('/test/fast/dependency/access/:uuid', api.fast.getAccessGraph);
+  app.get('/test/fast/precedence', api.fast.getPrecedence);
+  app.get('/test/fast/dataflow', api.fast.getAllDataFlowGraph);
+  app.get('/test/fast/dataflow/:uuid', api.fast.getDataFlowGraph);
 
   server.port = port || 9090;
-  server.listen(port, function() {
+  server.listen(server.port, function() {
     console.log('Controller UI listening on ', port);
     console.log('Controller Info: ', controller);
   });
