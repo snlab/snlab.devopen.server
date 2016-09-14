@@ -283,10 +283,8 @@ module.exports = function(store, port) {
       username: controller.login,
       password: controller.password,
       algorithms: {
-        serverHostKey: [
-          'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384',
-          'ecdsa-sha2-nistp521', 'ssh-dss'
-        ]
+        kex: [ 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1' ],
+        serverHostKey: [ 'ssh-rsa', 'ssh-dss' ]
       }
     });
   }
