@@ -204,9 +204,10 @@ module.exports = function(store, port) {
                                password: rows[0].password}, port);
           res.status(200).json({port: app.port});
           cacheList[uuid].app = app;
+          cacheList[uuid].port = port;
           cacheList[uuid].status.activate = true;
           console.log("Allocate a port for the above controller");
-          console.log("Cache List:", cacheList);
+          console.info("Cache List:", cacheList);
           return;
         }
       }
