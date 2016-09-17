@@ -25,6 +25,8 @@ module.exports = function(controller, port) {
 
   // Basic Controller Information
   app.get('/test/info', api.info);
+
+  // FAST API
   // Function Management
   app.get('/test/fast/function', api.fast.getAllFunction);
   app.get('/test/fast/function/:uuid', api.fast.getFunction);
@@ -38,6 +40,14 @@ module.exports = function(controller, port) {
   app.get('/test/fast/precedence', api.fast.getPrecedence);
   app.get('/test/fast/dataflow', api.fast.getAllDataFlowGraph);
   app.get('/test/fast/dataflow/:uuid', api.fast.getDataFlowGraph);
+
+  // Maple API
+  app.get('/test/maple/trace', api.maple.getTrace);
+  app.get('/test/maple/tracetree', api.maple.getTraceTree);
+  app.get('/test/maple/pkthistory', api.maple.getPacketHistory);
+
+  // Network API
+  app.get('/test/network/topology', api.network.getTopology);
 
   server.port = port || 9090;
   server.listen(server.port, function() {

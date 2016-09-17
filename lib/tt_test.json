@@ -1,0 +1,86 @@
+{
+  "ttnodes": [
+    {
+      "id": 0,
+      "type": "srcMac"
+    },
+    {
+      "id": 1,
+      "type": "dstMac"
+    },
+    {
+      "id": 2,
+      "type": "dstMac"
+    },
+    {
+      "id": 3,
+      "type": "dstMac"
+    },
+    {
+      "id": 4,
+      "type": "Action 1"
+    },
+    {
+      "id": 5,
+      "type": "Action 2"
+    }
+  ],
+  "ttlinks": [
+    {
+      "id": 0,
+      "predicateID": 0,
+      "operator": "==",
+      "condition": 1,
+      "destinationID": 1
+    },
+    {
+      "id": 1,
+      "predicateID": 0,
+      "operator": "==",
+      "condition": 3,
+      "destinationID": 1
+    },
+    {
+      "id": 2,
+      "predicateID": 0,
+      "operator": "==",
+      "condition": 2,
+      "destinationID": 2
+    },
+    {
+      "id": 3,
+      "predicateID": 0,
+      "operator": "==",
+      "condition": 4,
+      "destinationID": 3
+    },
+    {
+      "id": 4,
+      "predicateID": 1,
+      "operator": "==",
+      "condition": 11,
+      "destinationID": 4
+    },
+    {
+      "id": 5,
+      "predicateID": 1,
+      "operator": "==",
+      "condition": 13,
+      "destinationID": 4
+    },
+    {
+      "id": 6,
+      "predicateID": 1,
+      "operator": "==",
+      "condition": 12,
+      "destinationID": 5
+    },
+    {
+      "id": 7,
+      "predicateID": 1,
+      "operator": "==",
+      "condition": 14,
+      "destinationID": 5
+    }
+  ]
+}

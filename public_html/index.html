@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="devopen">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,34 +13,86 @@
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/next.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="css/ctrlhome.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/tracetree.css" rel="stylesheet">
+
+    <style>
+     .cy-view {
+       height: 0px;
+       padding-bottom: 45%
+     }
+    </style>
   </head>
 
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-            <li><a href="#" style="font-weight: bold">FAST <span class="sr-only"></span></a></li>
-            <li><a href="precedence-graph.html">Dependency Tracking</a></li>
-            <li><a href="fast-function.html">FAST functions</a></li>
-            <li><a href="fast-function-instance.html">FAST function instances</a></li>
+        <div class="col-sm-3 col-md-2 sidebar" ng-controller="navbar">
+          <ul class="nav nav-pill nav-sidebar nav-stacked">
+            <li role="presentation" ng-class="{active: isActive('/info')}">
+              <a href="#/info">
+                Controller Information<span class="sr-only">
+              </a>
+            </li>
+            <li role="presentation" ng-class="{active: isActive('/topology')}">
+              <a href="#/topology">
+                Topology<span class="sr-only">
+              </a>
+            </li>
+            <li role="presentation"
+                ng-class="{active: isActive('/instances') || isActive('/precedence') || isActive('/dataflow')}">
+              <a class="collapsed" data-toggle="collapse" href="#fastIntro"
+                 aria-expanded="true" aria-controlls="fastIntro" style="font-weight: bold">
+                FAST<span class="sr-only">
+              </a>
+              <ul id="fastIntro" class="nav nav-pill nav-stacked panel-collapse collapse in" role="tabpanel">
+                <li role="presentation" ng-class="{active: isActive('/instances')}">
+                  <a href="#/instances">
+                    Function Instances Table
+                  </a>
+                </li>
+                <li role="presentation" ng-class="{active: isActive('/precedence')}">
+                  <a href="#/precedence">
+                    Function Instance Graph
+                  </a>
+                </li>
+                <li role="presentation" ng-class="{active: isActive('/dataflow')}">
+                  <a href="#/dataflow">
+                    Data Flow Graph
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li role="presentation"
+                ng-class="{active: isActive('/tracetree') || isActive('/pkthistory')}">
+              <a class="collapsed" data-toggle="collapse" href="#mapleIntro"
+                 aria-expanded="true" aria-controlls="mapleIntro" style="font-weight: bold">
+                Maple<span class="sr-only">
+              </a>
+              <ul id="mapleIntro" class="nav nav-pill nav-stacked panel-collapse collapse in" role="tabpanel">
+                <li role="presentation" ng-class="{active: isActive('/tracetree')}">
+                  <a href="#/tracetree">
+                    Trace Tree
+                  </a>
+                </li>
+                <li role="presentation" ng-class="{active: isActive('/pkthistory')}">
+                  <a href="#/pkthistory">
+                    Packet History
+                  </a>
+                </li>
+              </ul>
+            </li>
           </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="" style="font-weight: bold">Maple<span class="sr-only"></span></a></li>
-            <li><a href="">Maple functions</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="controller-info.html" style="font-weight: bold">Controller Information<span class="sr-only"></a></li>
-          </ul>
+        </div>
+
+        <!-- Controller information panel -->
+        <div class=" col-sm-offset-3 col-sm-9 col-md-offset-2 col-md-10" ng-view>
         </div>
       </div>
 
-      <!-- Controller information panel -->
-      <div>
-      </div>
     </div>
     <!-- Bootstrap core JavaScript
          ================================================== -->
@@ -48,10 +100,28 @@
     <script src="js/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')</script>
     <script src="js/bootstrap.min.js"></script>
-    <script src="js/d3.min.js" charset="utf-8"></script>
-    <script>
-     var endpoint = location.protocol + "//" + location.host + "/test";
-     //get data
-    </script>
+    <script src="js/d3.min.js"></script>
+    <script src="js/next.js"></script>
+    <script src="js/jquery.qtip.min.js"></script>
+    <script src="js/bootstrap-table.js"></script>
+    <script src="js/cytoscape.min.js"></script>
+    <script src="js/dagre.js"></script>
+    <script src="js/lodash.min.js"></script>
+    <script src="js/graphlib.core.min.js"></script>
+    <script src="js/dagre-d3.core.min.js"></script>
+    <script src="js/dagre.js"></script>
+    <script src="js/cytoscape-dagre.js"></script>
+    <script src="js/cytoscape-qtip.js"></script>
+
+    <!-- Data render -->
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-route.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/topology.js"></script>
+    <script src="js/precedence.js"></script>
+    <script src="js/dataflow.js"></script>
+    <script src="js/tracetree.js"></script>
+    <!-- <script src="js/fast-function.js"></script> -->
+    <!-- <script src="js/fast-function-instance.js"></script> -->
   </body>
 </html>
