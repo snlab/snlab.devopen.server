@@ -33,15 +33,29 @@ function allocatePort(uuid) {
   }
 }
 
-function checkSSHStatus(controller) {
-  // Check the status of ssh connection for each controller
-  if (!controller) {
-    Object.keys(cacheList).forEach(function(uuid) {
-      checkSSHStatus(cacheList[uuid]);
+function refreshCache(db, success, fail) {
+  console.log("Refresh cache list");
+  db.all("SELECT * FROM controllers", function(err, rows) {
+    if (err) {
+      console.log("Fail to refresh cache list");
+      if (fail) fail(err);
+      return;
+    }
+    rows.forEach(function(e, i) {
+      if (!cacheList[e.uuid]) {
+        cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
+      }
+      cacheList[e.uuid].name = e.name;
+      cacheList[e.uuid].ip = e.ip;
+      cacheList[e.uuid].sshPort = e.sshPort;
+      cacheList[e.uuid].restPort = e.restPort;
+      cacheList[e.uuid].login = e.login;
+      cacheList[e.uuid].password = e.password;
+      rows[i].status = cacheList[e.uuid].status;
     });
-  }
-  // TODO: test ssh connection for a given controller
-  return;
+    console.log("Cache List:", cacheList);
+    if (success) success(rows);
+  });
 }
 
 /**
@@ -68,25 +82,10 @@ module.exports = function(store, port) {
   var db = new sqlite3.Database(store);
 
   app.get('/controllers', function(req, res) {
-    db.all("SELECT * FROM controllers", function(err, rows) {
-      if (err) {
-        res.status(400).json({message: err});
-        return;
-      }
-      rows.forEach(function(e) {
-        if (!cacheList[e.uuid]) {
-          cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
-        }
-        cacheList[e.uuid].name = e.name;
-        cacheList[e.uuid].ip = e.ip;
-        cacheList[e.uuid].sshPort = e.sshPort;
-        cacheList[e.uuid].restPort = e.restPort;
-        cacheList[e.uuid].login = e.login;
-        cacheList[e.uuid].password = e.password;
-      });
-      console.log("GET controllers:", rows);
-      console.log("Cache List:", cacheList);
-      res.status(200).json(rows);
+    refreshCache(db, function(data) {
+      res.status(200).json(data);
+    }, function(err) {
+      res.status(400).json({message: err});
     });
   });
 
@@ -188,7 +187,10 @@ module.exports = function(store, port) {
 
   app.get('/activate/:uuid', function(req, res) {
     var uuid = req.params.uuid;
-    // TODO: check if already active
+    if (cacheList[uuid] && cacheList[uuid].app && cacheList[uuid].port) {
+      res.status(200).json({port: app.port});
+      return;
+    }
     db.all("SELECT ip, restPort, login, password FROM controllers WHERE uuid='" + uuid + "'", function(err, rows) {
       if (err) {
         res.status(400).json({message: err});
@@ -203,9 +205,10 @@ module.exports = function(store, port) {
                                password: rows[0].password}, port);
           res.status(200).json({port: app.port});
           cacheList[uuid].app = app;
+          cacheList[uuid].port = port;
           cacheList[uuid].status.activate = true;
           console.log("Allocate a port for the above controller");
-          console.log("Cache List:", cacheList);
+          console.info("Cache List:", cacheList);
           return;
         }
       }
@@ -233,50 +236,60 @@ module.exports = function(store, port) {
     var uuid = req.params.uuid;
     var controller = cacheList[uuid];
     if (controller) {
-      var sshTest = new Client();
-      console.log('New Client');
-      sshTest.on('ready', function() {
-        console.log('Client :: ready');
-        var noerr = true;
-        sshTest.shell(function(err, stream) {
-          console.log('Start Shell Mode');
-          stream.on('close', function() {
-            console.log('Stream Closed: ', noerr);
-            if (noerr)
-              res.status(200).json({status: true});
-            sshTest.end();
-          });
-          if (err) {
-            console.log('Shell Error: ', err);
-            noerr = false;
-            res.status(400).json({message: err, status: false});
-            stream.close();
-          };
-          console.log('Execute Shell Command');
-          stream.end('exit\n');
-        });
-      }).on('error', function(err) {
-        console.log('Connection Error: ', err);
-        if (err) {
-          res.status(400).json({message: err, status: false});
-          sshTest.end();
-        };
-      }).connect({
-          host: controller.ip,
-          port: controller.sshPort,
-          username: controller.login,
-          password: controller.password,
-          algorithms: {
-            serverHostKey: [
-              'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384',
-              'ecdsa-sha2-nistp521', 'ssh-dss'
-            ]
-          }
-      });
+      testSSHStatus(controller, res);
     } else {
       res.status(404).json({message: "No such controller"});
     }
   });
+
+  app.post('/testssh', function(req, res) {
+    var controller = {
+      ip: req.body && req.body.ip || '127.0.0.1',
+      sshPort: req.body && req.body.sshPort || 8101,
+      login: req.body && req.body.login || 'karaf',
+      password: req.body && req.body.password || 'karaf'
+    };
+    testSSHStatus(controller, res);
+  });
+
+  /***** Methods *****/
+
+  function testSSHStatus(controller, res) {
+    var sshTest = new Client();
+    sshTest.on('ready', function() {
+      var noerr = true;
+      sshTest.shell(function(err, stream) {
+        stream.on('close', function() {
+          if (noerr)
+            console.log("SSH test successfully!");
+            res.status(200).json({status: "connect"});
+          sshTest.end();
+        }).on('data', function() {});
+        if (err) {
+          noerr = false;
+          console.log("Stream error, disconnect");
+          res.status(200).json({message: err, status: "disconnect"});
+          stream.close();
+        };
+        stream.end('exit\n');
+      });
+    }).on('error', function(err) {
+      if (err) {
+        console.log("Connection error, disconnect");
+        res.status(200).json({message: err, status: "disconnect"});
+        sshTest.end();
+      };
+    }).connect({
+      host: controller.ip,
+      port: controller.sshPort,
+      username: controller.login,
+      password: controller.password,
+      algorithms: {
+        kex: [ 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1' ],
+        serverHostKey: [ 'ssh-rsa', 'ssh-dss' ]
+      }
+    });
+  }
 
   port = port || 3000;
 
@@ -287,14 +300,16 @@ module.exports = function(store, port) {
       if (err) {
         db.run("CREATE TABLE controllers (uuid, name, ip, sshPort, restPort, login, password)", function(err) {
           if (err) throw err;
-          app.listen(port, function() {
+          server.listen(port, function() {
             console.log('Controller manager listening on ', port);
+            refreshCache(db);
           });
         });
       }
       else {
         server.listen(port, function() {
           console.log('Controller manager listening on ', port);
+          refreshCache(db);
         });
       }
     });

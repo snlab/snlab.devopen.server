@@ -25,6 +25,8 @@ module.exports = function(controller, port) {
 
   // Basic Controller Information
   app.get('/test/info', api.info);
+
+  // FAST API
   // Function Management
   app.get('/test/fast/function', api.fast.getAllFunction);
   app.get('/test/fast/function/:uuid', api.fast.getFunction);
@@ -35,12 +37,20 @@ module.exports = function(controller, port) {
   app.post('/test/fast/instance', api.fast.submitInstance);
   app.delete('/test/fast/instance/:uuid', api.fast.deleteInstance);
   // Dependency Track
-  app.get('/test/fast/dependency/precedence', api.fast.getPrecedence);
-  app.get('/test/fast/dependency/access', api.fast.getAllAccessGraph);
-  app.get('/test/fast/dependency/access/:uuid', api.fast.getAccessGraph);
+  app.get('/test/fast/precedence', api.fast.getPrecedence);
+  app.get('/test/fast/dataflow', api.fast.getAllDataFlowGraph);
+  app.get('/test/fast/dataflow/:uuid', api.fast.getDataFlowGraph);
+
+  // Maple API
+  app.get('/test/maple/trace', api.maple.getTrace);
+  app.get('/test/maple/tracetree', api.maple.getTraceTree);
+  app.get('/test/maple/pkthistory', api.maple.getPacketHistory);
+
+  // Network API
+  app.get('/test/network/topology', api.network.getTopology);
 
   server.port = port || 9090;
-  server.listen(port, function() {
+  server.listen(server.port, function() {
     console.log('Controller UI listening on ', port);
     console.log('Controller Info: ', controller);
   });
