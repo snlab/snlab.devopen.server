@@ -189,7 +189,10 @@ module.exports = function(store, port) {
 
   app.get('/activate/:uuid', function(req, res) {
     var uuid = req.params.uuid;
-    // TODO: check if already active
+    if (cacheList[uuid] && cacheList[uuid].app && cacheList[uuid].port) {
+      res.status(200).json({port: app.port});
+      return;
+    }
     db.all("SELECT ip, restPort, login, password FROM controllers WHERE uuid='" + uuid + "'", function(err, rows) {
       if (err) {
         res.status(400).json({message: err});
