@@ -33,15 +33,29 @@ function allocatePort(uuid) {
   }
 }
 
-function checkSSHStatus(controller) {
-  // Check the status of ssh connection for each controller
-  if (!controller) {
-    Object.keys(cacheList).forEach(function(uuid) {
-      checkSSHStatus(cacheList[uuid]);
+function refreshCache(db, success, fail) {
+  console.log("Refresh cache list");
+  db.all("SELECT * FROM controllers", function(err, rows) {
+    if (err) {
+      console.log("Fail to refresh cache list");
+      if (fail) fail(err);
+      return;
+    }
+    rows.forEach(function(e, i) {
+      if (!cacheList[e.uuid]) {
+        cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
+      }
+      cacheList[e.uuid].name = e.name;
+      cacheList[e.uuid].ip = e.ip;
+      cacheList[e.uuid].sshPort = e.sshPort;
+      cacheList[e.uuid].restPort = e.restPort;
+      cacheList[e.uuid].login = e.login;
+      cacheList[e.uuid].password = e.password;
+      rows[i].status = cacheList[e.uuid].status;
     });
-  }
-  // TODO: test ssh connection for a given controller
-  return;
+    console.log("Cache List:", cacheList);
+    if (success) success(rows);
+  });
 }
 
 /**
@@ -68,26 +82,10 @@ module.exports = function(store, port) {
   var db = new sqlite3.Database(store);
 
   app.get('/controllers', function(req, res) {
-    db.all("SELECT * FROM controllers", function(err, rows) {
-      if (err) {
-        res.status(400).json({message: err});
-        return;
-      }
-      rows.forEach(function(e, i) {
-        if (!cacheList[e.uuid]) {
-          cacheList[e.uuid] = {status: {ssh: "unknown", activate: false}};
-        }
-        cacheList[e.uuid].name = e.name;
-        cacheList[e.uuid].ip = e.ip;
-        cacheList[e.uuid].sshPort = e.sshPort;
-        cacheList[e.uuid].restPort = e.restPort;
-        cacheList[e.uuid].login = e.login;
-        cacheList[e.uuid].password = e.password;
-        rows[i].status = cacheList[e.uuid].status;
-      });
-      console.log("GET controllers:", rows);
-      console.log("Cache List:", cacheList);
-      res.status(200).json(rows);
+    refreshCache(db, function(data) {
+      res.status(200).json(data);
+    }, function(err) {
+      res.status(400).json({message: err});
     });
   });
 
@@ -302,14 +300,16 @@ module.exports = function(store, port) {
       if (err) {
         db.run("CREATE TABLE controllers (uuid, name, ip, sshPort, restPort, login, password)", function(err) {
           if (err) throw err;
-          app.listen(port, function() {
+          server.listen(port, function() {
             console.log('Controller manager listening on ', port);
+            refreshCache(db);
           });
         });
       }
       else {
         server.listen(port, function() {
           console.log('Controller manager listening on ', port);
+          refreshCache(db);
         });
       }
     });
