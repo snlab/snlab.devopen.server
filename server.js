@@ -2,6 +2,7 @@ var fs = require('fs');
 var bodyParser = require('../../node_modules/body-parser');
 var express = require('../../node_modules/express');
 var http = require('http');
+var request = require('request');
 var sqlite3 = require('../../node_modules/sqlite3');
 var Client = require('../../node_modules/ssh2').Client;
 var fuuid = require('./fast-uuid.js');
@@ -31,6 +32,65 @@ function allocatePort(uuid) {
   if (controller && !controller.port) {
     return ports.shift();
   }
+}
+
+function testSSHStatus(controller, res) {
+  var sshTest = new Client();
+  sshTest.on('ready', function() {
+    var noerr = true;
+    sshTest.shell(function(err, stream) {
+      stream.on('close', function() {
+        if (noerr)
+          console.log("SSH test successfully!");
+        res.status(200).json({status: "connect"});
+        sshTest.end();
+      }).on('data', function() {});
+      if (err) {
+        noerr = false;
+        console.log("Stream error, disconnect");
+        res.status(200).json({message: err, status: "disconnect"});
+        stream.close();
+      };
+      stream.end('exit\n');
+    });
+  }).on('error', function(err) {
+    if (err) {
+      console.log("Connection error, disconnect");
+      res.status(200).json({message: err, status: "disconnect"});
+      sshTest.end();
+    };
+  }).connect({
+    host: controller.ip,
+    port: controller.sshPort,
+    username: controller.login,
+    password: controller.password,
+    algorithms: {
+      kex: [ 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1' ],
+      serverHostKey: [ 'ssh-rsa', 'ssh-dss' ]
+    }
+  });
+}
+
+function testTopology(controller, res) {
+  var opts = {
+    url: "http://" + controller.ip + ":" + controller.restPort +
+      "/restconf/operational/network-topology:network-topology",
+    headers: {
+      'Authorization': 'Basic ' + new Buffer('admin:admin').toString('base64')
+    }
+  };
+  request.get(opts, function(error, response, body) {
+    if (response && response.statusCode == 200) {
+      var topo = JSON.parse(body)["network-topology"].topology[0];
+      if (topo.node) {
+        res.status(200).json({topology: topo.node.length});
+      } else {
+        res.status(200).json({topology: 0});
+      }
+      return;
+    }
+    res.status(400).json({message: "Cannot access network topology"});
+  });
 }
 
 function refreshCache(db, success, fail) {
@@ -69,7 +129,7 @@ function refreshCache(db, success, fail) {
  *   Integer restPort
  *   String  login
  *   String  password
- *   External
+ *   LIVE STATE:
  *     Object  status
  *       Boolean ssh
  *       Boolean activate
@@ -252,44 +312,15 @@ module.exports = function(store, port) {
     testSSHStatus(controller, res);
   });
 
-  /***** Methods *****/
-
-  function testSSHStatus(controller, res) {
-    var sshTest = new Client();
-    sshTest.on('ready', function() {
-      var noerr = true;
-      sshTest.shell(function(err, stream) {
-        stream.on('close', function() {
-          if (noerr)
-            console.log("SSH test successfully!");
-            res.status(200).json({status: "connect"});
-          sshTest.end();
-        }).on('data', function() {});
-        if (err) {
-          noerr = false;
-          console.log("Stream error, disconnect");
-          res.status(200).json({message: err, status: "disconnect"});
-          stream.close();
-        };
-        stream.end('exit\n');
-      });
-    }).on('error', function(err) {
-      if (err) {
-        console.log("Connection error, disconnect");
-        res.status(200).json({message: err, status: "disconnect"});
-        sshTest.end();
-      };
-    }).connect({
-      host: controller.ip,
-      port: controller.sshPort,
-      username: controller.login,
-      password: controller.password,
-      algorithms: {
-        kex: [ 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1' ],
-        serverHostKey: [ 'ssh-rsa', 'ssh-dss' ]
-      }
-    });
-  }
+  app.get('/testtopology/:uuid', function(req, res) {
+    var uuid = req.params.uuid;
+    var controller = cacheList[uuid];
+    if (controller) {
+      testTopology(controller, res);
+    } else {
+      res.status(404).json({message: "No such controller"});
+    }
+  });
 
   port = port || 3000;
 
