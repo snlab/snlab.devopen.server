@@ -70,25 +70,33 @@ var TraceTree = function() {
       var tt = new dagreD3.graphlib.Graph( { multigraph: true } ).setGraph({}).setDefaultEdgeLabel( function() { return {}; });
 
       data.ttnodes.forEach( function( n ) {
-        tt.setNode( n.id, { label: n.type, class: "tracetree-node" } );
-        if (n.type == "L" && n["maple-l-type:link"]) {
-          tt.setNode( n.id + ":action", { label: "toPorts", class: "tracetree-node" } );
-          var actions_label = "";
-          n["maple-l-type:link"].forEach( function( l ) {
-            actions_label = actions_label + l["src-node"].port + " -> " + l["dst-node"].port + "\n";
-          });
-          tt.setEdge( n.id
-                    , n.id + ":action"
-                    , { label: actions_label
-                      , lineInterpolate: "bundle" }
-                    , n.id + ":path");
+        if (n.type == "V") {
+          tt.setNode(n.id, {label: n['maple-v-type:field'], class: 'tracetree-node'});
+        }
+        else if (n.type == "T") {
+          tt.setNode(n.id, {label: n['maple-t-type:field'], class: 'tracetree-node'});
+        }
+        else if (n.type == "L") {
+          tt.setNode( n.id, { label: n['maple-l-type:action-type'], class: "tracetree-node" } );
+          if (n['maple-l-type:link']) {
+            tt.setNode(n.id + ':action', {label: 'toPorts', class: 'tracetree-node'});
+            var actions_label = "";
+            n["maple-l-type:link"].forEach( function( l ) {
+              actions_label = actions_label + l["src-node"].port + " -> " + l["dst-node"].port + "\n";
+            });
+            tt.setEdge( n.id
+                      , n.id + ":action"
+                      , { label: actions_label
+                        , lineInterpolate: "bundle" }
+                      , n.id + ":path");
+          }
         }
       } );
 
       data.ttlinks.forEach( function( l ) {
         tt.setEdge( l.predicateID
                   , l.destinationID
-                  , { label: " " + ( l.operator == "==" ? "": l.operator ) + " " + l.condition.toString()
+                  , { label: l.condition
                     , lineInterpolate: "bundle" }
                   , l.id );
       } );

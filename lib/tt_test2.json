@@ -1,0 +1,268 @@
+{
+  "ttnodes": [
+    {
+      "id": "33",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "35",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "10",
+      "type": "L",
+      "maple-l-type:action-type": "Drop"
+    },
+    {
+      "id": "37",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "28",
+      "maple-v-type:field": "IN_PORT",
+      "type": "V"
+    },
+    {
+      "id": "29",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "39",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "27",
+      "maple-v-type:field": "ETH_TYPE",
+      "type": "V"
+    },
+    {
+      "id": "16",
+      "type": "L",
+      "maple-l-type:link": [
+        {
+          "link-id": "openflow:2:1",
+          "dst-node": {
+            "port": "openflow:1:2",
+            "node-id": "openflow:1"
+          },
+          "src-node": {
+            "port": "openflow:2:1",
+            "node-id": "openflow:2"
+          }
+        }
+      ],
+      "maple-l-type:action-type": "Path"
+    },
+    {
+      "id": "1",
+      "maple-v-type:field": "IPv4_DST",
+      "type": "V"
+    },
+    {
+      "id": "15",
+      "maple-v-type:field": "IPv4_SRC",
+      "type": "V"
+    },
+    {
+      "id": "0",
+      "maple-t-type:field": "ETH_TYPE",
+      "type": "T"
+    },
+    {
+      "id": "3",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    },
+    {
+      "id": "2",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    },
+    {
+      "id": "20",
+      "maple-v-type:field": "IPv4_SRC",
+      "type": "V"
+    },
+    {
+      "id": "21",
+      "type": "L",
+      "maple-l-type:link": [
+        {
+          "link-id": "openflow:2:1",
+          "dst-node": {
+            "port": "openflow:1:2",
+            "node-id": "openflow:1"
+          },
+          "src-node": {
+            "port": "openflow:2:1",
+            "node-id": "openflow:2"
+          }
+        }
+      ],
+      "maple-l-type:action-type": "Path"
+    },
+    {
+      "id": "4",
+      "type": "L",
+      "maple-l-type:action-type": "Drop"
+    },
+    {
+      "id": "31",
+      "type": "L",
+      "maple-l-type:action-type": "Flood"
+    },
+    {
+      "id": "14",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    },
+    {
+      "id": "19",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    },
+    {
+      "id": "9",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    },
+    {
+      "id": "8",
+      "maple-t-type:field": "IPv4_SRC",
+      "type": "T"
+    }
+  ],
+  "ttlinks": [
+    {
+      "id": "40",
+      "predicateID": "28",
+      "destinationID": "39",
+      "condition": "openflow:1:2"
+    },
+    {
+      "id": "41",
+      "predicateID": "27",
+      "destinationID": "28",
+      "condition": "2054"
+    },
+    {
+      "id": "32",
+      "predicateID": "28",
+      "destinationID": "31",
+      "condition": "openflow:2:3"
+    },
+    {
+      "id": "42",
+      "predicateID": "0",
+      "destinationID": "27",
+      "condition": "!= 2048"
+    },
+    {
+      "id": "30",
+      "predicateID": "28",
+      "destinationID": "29",
+      "condition": "openflow:2:2"
+    },
+    {
+      "id": "38",
+      "predicateID": "28",
+      "destinationID": "37",
+      "condition": "openflow:3:1"
+    },
+    {
+      "id": "26",
+      "predicateID": "0",
+      "destinationID": "1",
+      "condition": "== 2048"
+    },
+    {
+      "id": "34",
+      "predicateID": "28",
+      "destinationID": "33",
+      "condition": "openflow:2:1"
+    },
+    {
+      "id": "25",
+      "predicateID": "1",
+      "destinationID": "14",
+      "condition": "167772161"
+    },
+    {
+      "id": "24",
+      "predicateID": "14",
+      "destinationID": "19",
+      "condition": "!= 167772162"
+    },
+    {
+      "id": "36",
+      "predicateID": "28",
+      "destinationID": "35",
+      "condition": "openflow:1:1"
+    },
+    {
+      "id": "23",
+      "predicateID": "19",
+      "destinationID": "20",
+      "condition": "== 167772163"
+    },
+    {
+      "id": "22",
+      "predicateID": "20",
+      "destinationID": "21",
+      "condition": "167772163"
+    },
+    {
+      "id": "11",
+      "predicateID": "9",
+      "destinationID": "10",
+      "condition": "!= 167772163"
+    },
+    {
+      "id": "5",
+      "predicateID": "3",
+      "destinationID": "4",
+      "condition": "!= 167772163"
+    },
+    {
+      "id": "12",
+      "predicateID": "8",
+      "destinationID": "9",
+      "condition": "!= 167772162"
+    },
+    {
+      "id": "13",
+      "predicateID": "1",
+      "destinationID": "8",
+      "condition": "167772162"
+    },
+    {
+      "id": "7",
+      "predicateID": "1",
+      "destinationID": "2",
+      "condition": "167772163"
+    },
+    {
+      "id": "6",
+      "predicateID": "2",
+      "destinationID": "3",
+      "condition": "!= 167772162"
+    },
+    {
+      "id": "17",
+      "predicateID": "15",
+      "destinationID": "16",
+      "condition": "167772162"
+    },
+    {
+      "id": "18",
+      "predicateID": "14",
+      "destinationID": "15",
+      "condition": "== 167772162"
+    }
+  ]
+}

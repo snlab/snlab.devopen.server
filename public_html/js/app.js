@@ -13,7 +13,8 @@ devopen.config([
     }).when('/fastIntro', {
       templateUrl: 'fastIntro.html'
     }).when('/instances', {
-      templateUrl: 'instances.html'
+      templateUrl: 'instances.html',
+      controller: 'instancesCtrl'
     }).when('/precedence', {
       templateUrl: 'precedence.html',
       controller: 'precedenceCtrl'
@@ -72,6 +73,20 @@ devopen.controller(
       Topology.init();
       Topology.installView(document.getElementById('viz'));
       Topology.periodicallyUpdate(3000);
+    }
+  ]
+);
+
+devopen.controller(
+  'instancesCtrl',
+  [
+    '$scope',
+    '$http',
+    function($scope, $http) {
+      getInstances();
+      setInterval(function() {
+        getInstances();
+      }, 1000);
     }
   ]
 );
