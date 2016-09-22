@@ -5,8 +5,12 @@ var devopen = angular.module('devopen', [
 devopen.config([
   '$routeProvider',
   function($routeProvider) {
-    $routeProvider.when('/info', {
+    $routeProvider.when('/basicIntro', {
+      templateUrl: 'basicIntro.html'
+    }).when('/info', {
       templateUrl: 'info.html'
+    }).when('/netIntro', {
+      templateUrl: 'netIntro.html'
     }).when('/topology', {
       templateUrl: 'topology.html',
       controller: 'topoCtrl'
