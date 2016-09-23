@@ -9,7 +9,8 @@ function getInstances() {
           invoke: e.instance.invoke,
           status: e.instance.status,
           submitTime: e.instance.submitTime,
-          groupId: e.instance.groupId || ""
+          groupId: e.instance.groupId || "",
+          dataDependency: e.instance.detaDependency || []
         };
       });
 
