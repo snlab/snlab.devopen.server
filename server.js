@@ -233,10 +233,10 @@ module.exports = function(store, port) {
       }
       console.log("Delete controller", uuid);
       console.log("Cache List:", cacheList);
-      if (cacheList[uuid].app) {
+      if (cacheList[uuid] && cacheList[uuid].app) {
         cacheList[uuid].app.close();
       }
-      if (cacheList[uuid].port) {
+      if (cacheList[uuid] && cacheList[uuid].port) {
         ports.push(cacheList[uuid].port);
       }
       delete cacheList[uuid];
