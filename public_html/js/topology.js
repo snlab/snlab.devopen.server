@@ -22,11 +22,27 @@ var Topology = function() {
                   props: {
                     style: 'margin-right: 5px;'
                   },
-                  content: 'MAC:'
+                  content: 'Device Id:'
                 },
                 {
                   tag: 'span',
-                  content: '{#node.model.mac}'
+                  content: '{#node.model.deviceId}'
+                }
+              ]
+            },
+            {
+              tag: 'p',
+              content: [
+                {
+                  tag: 'label',
+                  props: {
+                    style: 'margin-right: 5px;'
+                  },
+                  content: 'Address:'
+                },
+                {
+                  tag: 'span',
+                  content: '{#node.model.address}'
                 }
               ]
             },
