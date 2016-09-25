@@ -78,17 +78,22 @@ var TraceTree = function() {
         }
         else if (n.type == "L") {
           tt.setNode( n.id, { label: n['maple-l-type:action-type'], class: "tracetree-node" } );
-          if (n['maple-l-type:link']) {
-            tt.setNode(n.id + ':action', {label: 'toPorts', class: 'tracetree-node'});
+          if (n['maple-l-type:action-type'] == "Path") {
             var actions_label = "";
-            n["maple-l-type:link"].forEach( function( l ) {
-              actions_label = actions_label + l["src-node"].port + " -> " + l["dst-node"].port + "\n";
-            });
+            if (n["maple-l-type:link"] && n["maple-l-type:link"].length) {
+              tt.setNode(n.id + ':action', {label: 'toPorts', class: 'tracetree-node'});
+              n["maple-l-type:link"].forEach( function( l ) {
+                actions_label = actions_label + l["src-node"].port + " -> " + "\n";
+              });
+            }
+            else {
+              tt.setNode(n.id + ':action', {label: 'Drop', class: 'tracetree-node'});
+            }
             tt.setEdge( n.id
-                      , n.id + ":action"
-                      , { label: actions_label
-                        , lineInterpolate: "bundle" }
-                      , n.id + ":path");
+                        , n.id + ":action"
+                        , { label: actions_label
+                            , lineInterpolate: "bundle" }
+                        , n.id + ":path");
           }
         }
       } );
