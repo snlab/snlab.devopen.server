@@ -8,6 +8,8 @@ var Client = require('../../node_modules/ssh2').Client;
 var fuuid = require('./fast-uuid.js');
 
 var portalApp = require('./portalApp.js');
+var portalApp2 = require('./portalApp2.js');
+var portalApp3 = require('./portalApp3.js');
 
 var app = express();
 var server = http.createServer(app);
@@ -111,6 +113,7 @@ function refreshCache(db, success, fail) {
       cacheList[e.uuid].restPort = e.restPort;
       cacheList[e.uuid].login = e.login;
       cacheList[e.uuid].password = e.password;
+      cacheList[e.uuid].guiMode = e.guiMode;
       rows[i].status = cacheList[e.uuid].status;
     });
     console.log("Cache List:", cacheList);
@@ -129,6 +132,7 @@ function refreshCache(db, success, fail) {
  *   Integer restPort
  *   String  login
  *   String  password
+ *   String  guiMode
  *   LIVE STATE:
  *     Object  status
  *       Boolean ssh
@@ -158,8 +162,9 @@ module.exports = function(store, port) {
     var restPort = req.body && req.body.restPort || 8181;
     var login = req.body && req.body.login || 'karaf';
     var password = req.body && req.body.password || 'karaf';
-    db.run("INSERT INTO controllers VALUES (?, ?, ?, ?, ?, ?, ?)",
-           uuid, name, ip, sshPort, restPort, login, password,
+    var guiMode = req.body && req.body.guiMode || "devopen";
+    db.run("INSERT INTO controllers VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+           uuid, name, ip, sshPort, restPort, login, password, guiMode,
            function(err) {
              if (err) {
                res.status(400).json({message: err});
@@ -167,7 +172,7 @@ module.exports = function(store, port) {
              }
              cacheList[uuid] = {uuid: uuid, name: name, sshPort: sshPort,
                                 restPort: restPort, login: login,
-                                password: password,
+                                password: password, guiMode: guiMode,
                                 status: {ssh: "unknown", activate: false}};
              console.log("POST controller:", cacheList[uuid]);
              res.status(200).json({uuid: uuid});
@@ -197,6 +202,9 @@ module.exports = function(store, port) {
       }
       if (req.body.password) {
         args.push("password='" + req.body.password + "'");
+      }
+      if (req.body.guiMode) {
+        args.push("guiMode='" + req.body.guiMode + "'");
       }
     }
     if (!args) {
@@ -251,25 +259,38 @@ module.exports = function(store, port) {
       res.status(200).json({port: app.port});
       return;
     }
-    db.all("SELECT ip, restPort, login, password FROM controllers WHERE uuid='" + uuid + "'", function(err, rows) {
+    db.all("SELECT ip, restPort, login, password, guiMode FROM controllers WHERE uuid='" + uuid + "'", function(err, rows) {
       if (err) {
         res.status(400).json({message: err});
         return;
       }
       if (rows) {
         var port = allocatePort(uuid);
-        if (port) {
-          var app = portalApp({address: rows[0].ip,
-                               restPort: rows[0].restPort,
-                               login: rows[0].login,
-                               password: rows[0].password}, port);
-          res.status(200).json({port: app.port});
-          cacheList[uuid].app = app;
-          cacheList[uuid].port = port;
-          cacheList[uuid].status.activate = true;
-          console.log("Allocate a port for the above controller");
-          console.info("Cache List:", cacheList);
-          return;
+        if (port && rows[0].guiMode) {
+          var app;
+          if (rows[0].guiMode == "devopen") {
+            app = portalApp({address: rows[0].ip,
+                             restPort: rows[0].restPort,
+                             login: rows[0].login,
+                             password: rows[0].password}, port);
+          } else if (rows[0].guiMode == "ofng") {
+            app = portalApp2({address: rows[0].ip,
+                              restPort: rows[0].restPort,
+                              login: rows[0].login,
+                              password: rows[0].password}, port);
+          } else if (rows[0].guiMode.startsWith("http://") ||
+                     rows[0].guiMode.startsWith("https://")) {
+            app = portalApp3(rows[0].guiMode, port);
+          }
+          if (app) {
+            res.status(200).json({port: app.port});
+            cacheList[uuid].app = app;
+            cacheList[uuid].port = port;
+            cacheList[uuid].status.activate = true;
+            console.log("Allocate a port for the above controller");
+            console.info("Cache List:", cacheList);
+            return;
+          }
         }
       }
       res.status(404).json({message: "No such controller"});
@@ -329,7 +350,7 @@ module.exports = function(store, port) {
   db.run("SELECT * FROM controllers", function(err) {
     db.serialize(function() {
       if (err) {
-        db.run("CREATE TABLE controllers (uuid, name, ip, sshPort, restPort, login, password)", function(err) {
+        db.run("CREATE TABLE controllers (uuid, name, ip, sshPort, restPort, login, password, guiMode)", function(err) {
           if (err) throw err;
           server.listen(port, function() {
             console.log('Controller manager listening on ', port);
