@@ -2,6 +2,8 @@ var TraceTree = function() {
   return {
     actionLabels: ['action', 'drop', 'flood', 'punt', 'toPorts'],
 
+    tracetreeCache: {},
+
     init: function(view) {
       var _this = this;
       _this.view = view;
@@ -86,6 +88,17 @@ var TraceTree = function() {
                 actions_label = actions_label + l["src-node"].port + " -> " + "\n";
               });
             }
+            else if (n["maple-l-type:path-tt"] && n["maple-l-type:path-tt"].length) {
+              tt.setNode(n.id + ':action', {label: 'multiPath', class: 'tracetree-node'});
+              n["maple-l-type:path-tt"].forEach( function( p ) {
+                if (p["link-tt"] && p["link-tt"].length) {
+                  actions_label = actions_label + "path" + p["path-id"] + " :\n";
+                  p["link-tt"].forEach( function( l ) {
+                    actions_label = actions_label + l["src-node"].port + " -> \n";
+                  });
+                }
+              });
+            }
             else {
               tt.setNode(n.id + ':action', {label: 'Drop', class: 'tracetree-node'});
             }
@@ -154,7 +167,10 @@ var TraceTree = function() {
       var _this = this;
       d3.json(endpoint + '/maple/tracetree')
         .get(function(err, data) {
-          _this.draw(data);
+          if (!err) {
+            _this.tracetreeCache = data;
+            _this.draw(data);
+          }
         });
     },
 
@@ -163,6 +179,11 @@ var TraceTree = function() {
       this.periodicallyUpdateId = setInterval(function() {
         TraceTree.pollServer();
       }, interval);
+    },
+
+    getPathFromTraceTree: function() {
+      paths = [];
+      return paths;
     }
   };
 }();

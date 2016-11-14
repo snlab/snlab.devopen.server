@@ -108,7 +108,7 @@ var Topology = function() {
           nodeTooltipContentClass: 'FRMNodeTooltip'
         },
         showIcon: true,
-        identityKey: 'name',
+        identityKey: 'deviceId',
         autoLayout: true,
         dataProcessor: 'force'
       });
