@@ -1,10 +1,7 @@
-.tracetree-node rect {
-    stroke: #999;
-    fill: #fff;
-    stroke-width: 1.5px;
-}
-
-.tracetree-node circle, .tracetree-node ellipse {
+.tracetree-node rect,
+.tracetree-node circle,
+.tracetree-node polygon,
+.tracetree-node ellipse {
     stroke: #999;
     fill: #fff;
     stroke-width: 1.5px;
@@ -32,4 +29,10 @@
 .grabbing {
     cursor: -webkit-grabbing;
     cursor: grabbing;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
 }

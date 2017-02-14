@@ -148,6 +148,149 @@ var TraceTree = function() {
       }
     },
 
+    drawTree: function( data ) {
+      var _this = this;
+      var diagonal = d3.svg.diagonal()
+        .projection( function( d ) {
+          return [d.x, d.y];
+        } );
+
+      var duration = 750;
+      var tt = [];
+      var nodes = {};
+      var links = [];
+
+      data.ttnodes.forEach( function( n ) {
+        n.name = n.id;
+        n.parent = null;
+        nodes[ n.id ] = n;
+        if (n.type == "V") {
+          n.label = n['maple-v-type:field'];
+        }
+        else if (n.type == "T") {
+          n.label = n['maple-t-type:field'];
+        }
+        else if (n.type == "L") {
+          n.label = n['maple-l-type:action-type'];
+        }
+      } );
+
+      data.ttlinks.forEach( function( l ) {
+        var prev = nodes[ l.predicateID ];
+        var next = nodes[ l.destinationID ];
+        next.parent = l.predicateID;
+        if ( !prev.children ) prev.children = [];
+        if ( l.condition.startsWith('==') )
+          prev.children.unshift( next );
+        else
+          prev.children.push( next );
+
+        links.push({
+          source: prev,
+          target: next,
+          condition: l.condition });
+      } );
+
+      var root = null;
+      data.ttnodes.forEach( function( n ) {
+        if ( !nodes[ n.id ].parent ) root = nodes[ n.id ];
+      } );
+
+      var tree = d3.layout.tree().size([500, 600]);
+      var nodes = tree.nodes(root);
+      // var links = tree.links(nodes);
+
+      nodes.forEach( function( d ) {
+        d.y = 100 + d.depth * 100;
+        d.x = d.x * 2;
+      } );
+
+      var link = _this.svgg.selectAll( "path.link" )
+        .data( links, function( d ) { return d.target.id; } );
+
+      var linkLabels = link.enter().append( "g" )
+        .attr( "class", "label" );
+
+      linkLabels.append( "path", "g" )
+        .attr( "class", "link" )
+        .attr( "d", function( d ) {
+          var o = { x: root.x, y: root.y };
+          return diagonal({ source: o, target: o });
+        } );
+
+      linkLabels.append( "text" )
+        .attr( "transform", function( d ) {
+          return "translate(" +
+            ( ( d.source.x + d.target.x ) / 2 ) + "," + 
+            ( ( d.source.y + d.target.y ) / 2 ) + ")";
+        } )   
+        .attr( "dy", ".35em" )
+        .attr( "text-anchor", "middle" )
+        .text( function( d ) { return d.condition; } )
+
+      link.transition()
+        .duration( duration )
+        .attr( "d", diagonal );
+
+      link.exit().transition()
+        .duration( duration )
+        .attr( "d", function( d ) {
+          var o = { x: root.x, y: root.y };
+          return diagonal({ source: o, target: o });
+        } )
+        .remove();
+
+
+      var node = _this.svgg.selectAll( "g.node" )
+        .data( nodes )
+        .enter().append( "g" )
+        .attr( "class", "tracetree-node" )
+        .attr( "transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+        } );
+
+      node.filter( function( d ) { return d.type == "T"; } )
+        .append( "polygon" )
+        .attr( "points", "-50 0 0 30 50 0 0 -30" );
+
+      node.filter( function( d ) { return d.type == "V"; } )
+        .append( "ellipse" )
+        .attr( "cx", 0 )
+        .attr( "cy", 0 )
+        .attr( "rx", 40 )
+        .attr( "ry", 20 );
+
+      node.filter( function( d ) { return d.type == "L"; } )
+        .append( "rect" )
+        .attr( "x", -25 )
+        .attr( "y", -15 )
+        .attr( "width", 50 )
+        .attr( "height", 30 )
+        .attr( "rx", 10 )
+        .attr( "ry", 10 );
+
+      node.append( "text" )
+        .attr( "y", function( d ) { return 0; } )
+        .attr( "dy", ".35em" )
+        .attr( "text-anchor", function( d ) { return "middle"; } )
+        .text( function( d ) { return d.label; } );
+
+      nodes.forEach( function( d ) {
+        d.x0 = d.x;
+        d.y0 = d.y;
+      } );
+
+      // if ( !_this.resetPosition ) {
+      //   _this.resetPosition = true;
+      //   var bbox = _this.svg.node().getBoundingClientRect();
+      //   var graphScale = bbox.width / tt.graph().width; // fit to viewport
+      //   var top_margin = 20;
+      //   _this.zoom.scale( graphScale )
+      //              .translate( [ ( bbox.width - graphScale * tt.graph().width ) / 2, top_margin ] )
+      //              .event( _this.svg );
+      // }
+    },
+
     nodeIsAction: function( node ) {
       return this.actionLabels.indexOf( node.label ) > -1;
     },
@@ -169,7 +312,7 @@ var TraceTree = function() {
         .get(function(err, data) {
           if (!err) {
             _this.tracetreeCache = data;
-            _this.draw(data);
+            _this.drawTree(data);
           }
         });
     },
