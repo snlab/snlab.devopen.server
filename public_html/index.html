@@ -84,7 +84,7 @@
               </ul>
             </li>
             <li class="level1" role="presentation"
-                ng-class="{active: isActive('/tracetree') || isActive('/pkthistory')}">
+                ng-class="{active: isActive('/tracetree') || isActive('/tracetreehistory') || isActive('/pkthistory')}">
               <a data-toggle="collapse" href="#mapleIntro"
                  aria-expanded="true" aria-controlls="mapleIntro">
                 Maple
@@ -93,6 +93,11 @@
                 <li role="presentation" ng-class="{active: isActive('/tracetree')}">
                   <a href="#/tracetree">
                     Trace Tree
+                  </a>
+                </li>
+                <li role="presentation" ng-class="{active: isActive('/tracetreehistory')}">
+                  <a href="#/tracetreehistory">
+                    Trace Tree History
                   </a>
                 </li>
                 <li role="presentation" ng-class="{active: isActive('/pkthistory')}">

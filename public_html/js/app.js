@@ -30,6 +30,9 @@ devopen.config([
     }).when('/tracetree', {
       templateUrl: 'tracetree.html',
       controller: 'ttCtrl'
+    }).when('/tracetreehistory', {
+      templateUrl: "tracetreehistory.html",
+      controller: "ttCtrl"
     }).when('/pkthistory', {
       templateUrl: 'pkthistory.html',
       controller: 'pktCtrl'
