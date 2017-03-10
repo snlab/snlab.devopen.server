@@ -32,7 +32,7 @@ devopen.config([
       controller: 'ttCtrl'
     }).when('/tracetreehistory', {
       templateUrl: "tracetreehistory.html",
-      controller: "ttCtrl"
+      controller: "ttHistCtrl"
     }).when('/pkthistory', {
       templateUrl: 'pkthistory.html',
       controller: 'pktCtrl'
@@ -48,6 +48,9 @@ devopen.run(function($rootScope, $location) {
         Topology.deinit();
       } else if (current.originalPath == '/tracetree' &&
                  next.originalPath != '/tracetree') {
+        TraceTree.deinit();
+      } else if (current.originalPath == '/tracetreehistory' &&
+                 next.originalPath != '/tracetreehistory') {
         TraceTree.deinit();
       }
     }
@@ -125,6 +128,18 @@ devopen.controller(
     '$http',
     function($scope, $http) {
       TraceTree.init(document.getElementById('tt-view'));
+      TraceTree.periodicallyUpdate();
+    }
+  ]
+);
+
+devopen.controller(
+  'ttHistCtrl',
+  [
+    '$scope',
+    '$http',
+    function($scope, $http) {
+      TraceTree.init(document.getElementById('tthist-view'));
       TraceTree.periodicallyUpdate();
     }
   ]

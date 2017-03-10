@@ -327,6 +327,22 @@ var TraceTree = function() {
         });
     },
 
+    // next, previous actions
+
+    updateTraceTreeHistory: function() {
+      var _this = this;
+      if (_this.tracetreehistory_seq == null) {
+        _this.tracetreehistory_seq = 0;
+      }
+      d3.json(endpoint + '/maple/tracetreehistory/' + _this.tracetreehistory_seq)
+        .get(function(err, data) {
+          if (!err) {
+            _this.tracetreeCache = data;
+            _this.drawTree(data);
+          }
+        });
+    },
+
     periodicallyUpdate: function(interval) {
       var interval = interval || 1000;
       this.periodicallyUpdateId = setInterval(function() {
