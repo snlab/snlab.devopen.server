@@ -7,6 +7,7 @@ var TraceTree = function() {
     init: function(view) {
       var _this = this;
       _this.view = view;
+      _this.tracetreeStringCache = '';
       _this.buildsvg();
       // _this.periodicallyUpdate();
       // serverEventSrc = new EventSource('/event');
@@ -26,6 +27,7 @@ var TraceTree = function() {
       this.svgg = null;
       this.svg = null;
       this.view = null;
+      this.tracetreeStringCache = '';
 
       clearInterval(this.periodicallyUpdateId);
     },
@@ -311,8 +313,16 @@ var TraceTree = function() {
       d3.json(endpoint + '/maple/tracetree')
         .get(function(err, data) {
           if (!err) {
-            _this.tracetreeCache = data;
-            _this.drawTree(data);
+            tracetreeString = JSON.stringify(data);
+            if (!(_.isEqual(tracetreeString, _this.tracetreeStringCache))) {
+              _this.tracetreeCache = data;
+              _this.tracetreeStringCache = tracetreeString;
+              if (_this.svg.select("g")) {
+                _this.svg.select("g").remove();
+                _this.buildsvg();
+              }
+              _this.drawTree(data);
+            }
           }
         });
     },
