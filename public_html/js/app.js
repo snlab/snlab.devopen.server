@@ -139,8 +139,11 @@ devopen.controller(
     '$scope',
     '$http',
     function($scope, $http) {
-      TraceTree.init(document.getElementById('tthist-view'));
-      TraceTree.periodicallyUpdate();
+      $scope.next = function() { TraceTree.nextTracetree(); };
+      $scope.prev = function() { TraceTree.prevTracetree(); };
+
+      TraceTree.init(document.getElementById('tt-view'));
+      TraceTree.updateTracetreeHistory();
     }
   ]
 );

@@ -9,6 +9,7 @@ var TraceTree = function() {
       _this.view = view;
       _this.tracetreeStringCache = '';
       _this.buildsvg();
+      _this.tracetreehistory_seq = 0;
       // _this.periodicallyUpdate();
       // serverEventSrc = new EventSource('/event');
       // serverEventSrc.newEventListener('message', function(msg) {
@@ -321,15 +322,27 @@ var TraceTree = function() {
                 _this.svg.select("g").remove();
                 _this.buildsvg();
               }
-              _this.drawTree(data);
+             _this.drawTree(data);
             }
           }
         });
     },
 
-    // next, previous actions
+    nextTracetree: function() {
+      var _this = this;
+      _this.tracetreehistory_seq++;
+      _this.updateTracetreeHistory();
+    },
 
-    updateTraceTreeHistory: function() {
+    prevTracetree: function() {
+      var _this = this;
+      if (_this.tracetreehistory_seq > 0) {
+        _this.tracetreehistory_seq--;
+        _this.updateTracetreeHistory();
+      }
+    },
+
+    updateTracetreeHistory: function() {
       var _this = this;
       if (_this.tracetreehistory_seq == null) {
         _this.tracetreehistory_seq = 0;
@@ -338,6 +351,11 @@ var TraceTree = function() {
         .get(function(err, data) {
           if (!err) {
             _this.tracetreeCache = data;
+            console.log(data);
+            if (_this.svg.select("g")) {
+              _this.svg.select("g").remove();
+              _this.buildsvg();
+            }
             _this.drawTree(data);
           }
         });

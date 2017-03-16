@@ -44,7 +44,7 @@ module.exports = function(controller, port) {
   // Maple API
   app.get('/test/maple/trace', api.maple.getTrace);
   app.get('/test/maple/tracetree', api.maple.getTraceTree);
-  app.get('/test/maple/tracetreehistory', api.maple.getTraceTreeHistory);
+  app.get('/test/maple/tracetreehistory/:seqnum', api.maple.getTraceTreeHistory);
   app.get('/test/maple/pkthistory', api.maple.getPacketHistory);
 
   // Network API
