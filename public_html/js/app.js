@@ -141,6 +141,7 @@ devopen.controller(
     function($scope, $http) {
       $scope.next = function() { TraceTree.nextTracetree(); };
       $scope.prev = function() { TraceTree.prevTracetree(); };
+      $scope.packet = function() { return TraceTree.packetStr; };
 
       TraceTree.init(document.getElementById('tt-view'));
       TraceTree.updateTracetreeHistory();
