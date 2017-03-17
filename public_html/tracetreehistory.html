@@ -1,9 +1,12 @@
 <!-- <div class="container"> -->
   <div id="tt-view" class="block">
     <center>
-     <a href="#/tracetreehistory" ng-click="next()">Next</a>
-     <a href="#/tracetreehistory" ng-click="prev()">Previous</a>
-     <div> {{packet()}} </div>
+     <div style="width:100%; border-bottom: solid black; padding-bottom: 6px;">
+       Showing {{tracetreehistory_seq()}} of {{num_tracetrees()}}
+       <a href="#/tracetreehistory" ng-hide="hide_prev()" ng-click="prev()">Previous</a>
+       <a href="#/tracetreehistory" ng-hide="hide_next()" ng-click="next()">Next</a>
+       <div> {{packet()}} </div>
+     </div>
      <svg width=100% height=100%>
     </center>
   </div>

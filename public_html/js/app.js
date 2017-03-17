@@ -143,6 +143,19 @@ devopen.controller(
       $scope.prev = function() { TraceTree.prevTracetree(); };
       $scope.packet = function() { return TraceTree.packetStr; };
 
+      $scope.tracetreehistory_seq = function() { return TraceTree.tracetreehistory_seq + 1; };
+      $scope.num_tracetrees = function() { return TraceTree.num_tracetrees; };
+
+      $scope.hide_next = function() {
+        if (TraceTree.tracetreehistory_seq == -1 || !TraceTree.num_tracetrees || TraceTree.tracetreehistory_seq == TraceTree.num_tracetrees - 1) {
+         return true;
+        }
+        return false;
+      }
+      $scope.hide_prev = function() {
+        return TraceTree.tracetreehistory_seq == 0;
+      }
+
       TraceTree.init(document.getElementById('tt-view'));
       TraceTree.updateTracetreeHistory();
     }

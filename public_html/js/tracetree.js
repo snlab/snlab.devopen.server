@@ -10,6 +10,7 @@ var TraceTree = function() {
       _this.tracetreeStringCache = '';
       _this.buildsvg();
       _this.tracetreehistory_seq = -1;
+      _this.num_tracetrees = 0;
       // _this.periodicallyUpdate();
       // serverEventSrc = new EventSource('/event');
       // serverEventSrc.newEventListener('message', function(msg) {
@@ -29,7 +30,6 @@ var TraceTree = function() {
       this.svg = null;
       this.view = null;
       this.tracetreeStringCache = '';
-
       clearInterval(this.periodicallyUpdateId);
     },
 
@@ -359,19 +359,20 @@ var TraceTree = function() {
 
     updateTracetreeHistory: function() {
       var _this = this;
-      if (_this.tracetreehistory_seq == -1) {
-        d3.json(endpoint + '/maple/tracetreehistory_seq')
-          .get(function(err, data) {
+      d3.json(endpoint + '/maple/tracetreehistory_seq')
+        .get(function(err, data) {
+          if (_this.tracetreehistory_seq == -1) {
             if (!err && data['seq_num'] > 0) {
               _this.tracetreehistory_seq = data['seq_num'] - 1;
             } else {
               _this.tracetreehistory_seq = 0;
             }
-            _this.getTracetreeHistoryFromServer();
-          });
-      } else  {
-        _this.getTracetreeHistoryFromServer();
-      }
+          }
+          if (!err) {
+            _this.num_tracetrees = data['seq_num'];
+          }
+          _this.getTracetreeHistoryFromServer();
+        });
     },
 
     periodicallyUpdate: function(interval) {
