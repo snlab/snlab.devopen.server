@@ -352,6 +352,7 @@ var TraceTree = function() {
           if (!err) {
             _this.tracetreeCache = data.tracetree;
             _this.packetStr = data.packet;
+            document.getElementById("tracetreehistory-packet").innerHTML = data.packet;
             _this.drawTree(data.tracetree);
           }
         });
@@ -372,6 +373,8 @@ var TraceTree = function() {
             _this.num_tracetrees = data['seq_num'];
           }
           _this.getTracetreeHistoryFromServer();
+          document.getElementById("tracetreehistory-seq").innerHTML = _this.tracetreehistory_seq + 1;
+          document.getElementById("num-tracetrees").innerHTML = _this.num_tracetrees;
         });
     },
 

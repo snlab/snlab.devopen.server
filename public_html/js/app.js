@@ -141,10 +141,6 @@ devopen.controller(
     function($scope, $http) {
       $scope.next = function() { TraceTree.nextTracetree(); };
       $scope.prev = function() { TraceTree.prevTracetree(); };
-      $scope.packet = function() { return TraceTree.packetStr; };
-
-      $scope.tracetreehistory_seq = function() { return TraceTree.tracetreehistory_seq + 1; };
-      $scope.num_tracetrees = function() { return TraceTree.num_tracetrees; };
 
       $scope.hide_next = function() {
         if (TraceTree.tracetreehistory_seq == -1 || !TraceTree.num_tracetrees || TraceTree.tracetreehistory_seq == TraceTree.num_tracetrees - 1) {
