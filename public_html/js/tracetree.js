@@ -313,7 +313,7 @@ var TraceTree = function() {
       d3.json(endpoint + '/maple/tracetree')
         .get(function(err, data) {
           if (!err) {
-            tracetreeString = JSON.stringify(data);
+            var tracetreeString = JSON.stringify(data);
             if (!(_.isEqual(tracetreeString, _this.tracetreeStringCache))) {
               _this.tracetreeCache = data;
               _this.tracetreeStringCache = tracetreeString;
