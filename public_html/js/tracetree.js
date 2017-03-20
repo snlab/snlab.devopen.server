@@ -175,6 +175,27 @@ var TraceTree = function() {
         }
         else if (n.type == "L") {
           n.label = n['maple-l-type:action-type'];
+          if (n['maple-l-type:action-type'] == "Path") {
+            var actions_label = "";
+            var newN = {};
+            if (n["maple-l-type:link"] && n["maple-l-type:link"].length) {
+              newN.id = n.id + ':action';
+              newN.name = newN.id;
+              newN.label = 'toPorts';
+              newN.type = "L";
+              n["maple-l-type:link"].forEach( function(l, idx, array) {
+                actions_label = actions_label + l["src-node"].port;
+                if (idx < array.length - 1) {
+                  actions_label = actions_label + " -> ";
+                }
+              });
+              data.ttlinks.push({
+                predicateID: n.id,
+                destinationID: newN.id,
+                condition: actions_label});
+              nodes[newN.id] = newN;
+            }
+          }
         }
       } );
 
@@ -200,36 +221,37 @@ var TraceTree = function() {
       } );
 
       var tree = d3.layout.tree().size([500, 600]);
-      var nodes = tree.nodes(root);
+      nodes = tree.nodes(root);
       // var links = tree.links(nodes);
 
       nodes.forEach( function( d ) {
         d.y = 100 + d.depth * 100;
-        d.x = d.x * 2;
-      } );
+        d.x = d.x * 3;
+      } ); 
 
       var link = _this.svgg.selectAll( "path.link" )
         .data( links, function( d ) { return d.target.id; } );
 
       var linkLabels = link.enter().append( "g" )
-        .attr( "class", "label" );
+        .attr( "class", "label" )
+        .attr("width", 100);
 
       linkLabels.append( "path", "g" )
         .attr( "class", "link" )
-        .attr( "d", function( d ) {
-          var o = { x: root.x, y: root.y };
-          return diagonal({ source: o, target: o });
-        } );
+        .attr( "d", diagonal);
 
       linkLabels.append( "text" )
         .attr( "transform", function( d ) {
+          if (d.target.label == "toPorts") {
+            return "translate(" + d.target.x + "," + (d.target.y + 30) + ")";
+          }
           return "translate(" +
             ( ( d.source.x + d.target.x ) / 2 ) + "," + 
             ( ( d.source.y + d.target.y ) / 2 ) + ")";
-        } )   
+        } )
         .attr( "dy", ".35em" )
         .attr( "text-anchor", "middle" )
-        .text( function( d ) { return d.condition; } )
+        .html( function( d ) { return d.condition; } );
 
       link.transition()
         .duration( duration )
@@ -321,7 +343,7 @@ var TraceTree = function() {
                 _this.svg.select("g").remove();
                 _this.buildsvg();
               }
-            _this.drawTree(data);
+            _this.draw(data);
             }
           }
         });
