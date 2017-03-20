@@ -343,7 +343,7 @@ var TraceTree = function() {
                 _this.svg.select("g").remove();
                 _this.buildsvg();
               }
-            _this.draw(data);
+            _this.drawTree(data);
             }
           }
         });
