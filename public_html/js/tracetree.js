@@ -26,10 +26,12 @@ var TraceTree = function() {
     deinit: function() {
       this.drag = null;
       this.zoom = null;
+      this.packet = null;
       this.svgg = null;
       this.svg = null;
       this.view = null;
       this.tracetreeStringCache = '';
+      this.packetTimestamp = null;
       clearInterval(this.periodicallyUpdateId);
     },
 
@@ -220,6 +222,69 @@ var TraceTree = function() {
         if ( !nodes[ n.id ].parent ) root = nodes[ n.id ];
       } );
 
+      if (this.packet) {
+        var currentNode = root;
+        while (currentNode && currentNode.children) {
+          currentNode.color = true;
+          if (currentNode.type == "L") {
+            // done
+            currentNode = currentNode.children ? currentNode.children[0] : null;
+            continue;
+          }
+          var attribute = currentNode.label;
+ 
+          // search packet for this attribute
+          var currentObject = this.packet;
+          var packetValue = null;
+          while (currentObject) {
+            if (currentObject[attribute]) {
+              var rawValue = currentObject[attribute];
+              switch(attribute) {
+                case "ETH_TYPE":
+                  if (rawValue == "0x0800") {
+                    packetValue = "IPv4";
+                  } else if (rawValue == "0x0806") {
+                    packetValue = "ARP";
+                  } else {
+                    packetValue = parseInt(rawValue, 16).toString();
+                  }
+                  break;
+                case "IPv4_DST":
+                case "IPv4_SRC":
+                  packetValue = rawValue;
+                  break;
+                default:
+                  packetValue = parseInt(rawValue, 16).toString();
+              }
+              break;
+            }
+            currentObject = currentObject.payload;
+          }
+
+          var nextNode = null;
+          links.forEach( function( l ) {
+            if (l.source.id != currentNode.id) {
+              return;
+            }
+            if (currentNode.type == "T") {
+              if (l.condition.substring(0, 2) == "==" && l.condition.substring(3) == packetValue) {
+                nextNode = l.target;
+              }
+              if (l.condition.substring(0, 2) == "!=" && l.condition.substring(3) != packetValue) {
+                nextNode = l.target;
+              }
+            } else if (currentNode.type == "V") {
+              if (l.condition == packetValue) {
+                nextNode = l.target;
+              }
+            }
+          });
+          currentNode = nextNode;
+        }
+        if (currentNode) {
+          currentNode.color = true;
+        }
+      } 
       var tree = d3.layout.tree().size([500, 600]);
       nodes = tree.nodes(root);
       // var links = tree.links(nodes);
@@ -227,7 +292,7 @@ var TraceTree = function() {
       nodes.forEach( function( d ) {
         d.y = 100 + d.depth * 100;
         d.x = d.x * 3;
-      } ); 
+      } );
 
       var link = _this.svgg.selectAll( "path.link" )
         .data( links, function( d ) { return d.target.id; } );
@@ -299,6 +364,13 @@ var TraceTree = function() {
         .attr( "text-anchor", function( d ) { return "middle"; } )
         .text( function( d ) { return d.label; } );
 
+      var shapes = ["polygon", "ellipse", "rect"];
+      for (var i in shapes) {
+        node.filter( function( d ) { return d.color == true; } )
+          .selectAll(shapes[i])
+          .style("fill", "yellow");
+      }
+
       nodes.forEach( function( d ) {
         d.x0 = d.x;
         d.y0 = d.y;
@@ -343,7 +415,7 @@ var TraceTree = function() {
                 _this.svg.select("g").remove();
                 _this.buildsvg();
               }
-            _this.drawTree(data);
+              _this.drawTree(data);
             }
           }
         });
@@ -373,8 +445,11 @@ var TraceTree = function() {
           } 
           if (!err) {
             _this.tracetreeCache = data.tracetree;
-            _this.packetStr = data.packet;
-            document.getElementById("tracetreehistory-packet").innerHTML = data.packet;
+            _this.packetStr = data.packetStr;
+            _this.packet = data.packetJSON.frame;
+            _this.packetTimestamp = data.timestamp;
+            document.getElementById("tracetreehistory-packet-timestamp").innerHTML = "Timestamp: ".concat(data.timestamp);
+            document.getElementById("tracetreehistory-packet-string").innerHTML = data.packetStr;
             _this.drawTree(data.tracetree);
           }
         });
