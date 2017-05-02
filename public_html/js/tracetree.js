@@ -31,7 +31,7 @@ var TraceTree = function() {
       this.svg = null;
       this.view = null;
       this.tracetreeStringCache = '';
-      this.packetTimestamp = null;
+      this.packetList = null;
       clearInterval(this.periodicallyUpdateId);
     },
 
@@ -336,7 +336,50 @@ var TraceTree = function() {
         .attr( "class", "tracetree-node" )
         .attr( "transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
-        } );
+        })
+        .on("mouseover", function(d) {
+          if (!d.debuginfo) { return; }
+          var n = d3.select(this); // The node
+          var textInBox = d.debuginfo.filename + ":" + d.debuginfo.linenumber;
+          // render text to get width, then delete it
+          var introText = n.append('text')
+            .classed('introText', true)
+            .attr('x', 0)
+            .attr('y', 0)
+            .text('Dependency recorded at:');
+          var info = n.append('text')
+            .classed('info', true)
+            .attr('x', 0)
+            .attr('y', 0)
+            .text(textInBox);
+          var textWidth = Math.max(info.node().getComputedTextLength(), introText.node().getComputedTextLength());
+          d3.select(this).select("text.info").remove();
+          d3.select(this).select("text.introText").remove();
+          var rect = n.append("rect")
+            .classed("info", true)
+            .attr("x", 25)
+            .attr("y", -50)
+            .attr("width", textWidth + 40)
+            .attr("height", 50);
+          var introText = n.append('text')
+            .classed('introText', true)
+            .attr('x', 25 + 20 + textWidth / 2)
+            .attr('y', -30)
+            .style("text-anchor", "middle")
+            .text('Dependency recorded at:');
+          var info = n.append('text')
+            .classed('info', true)
+            .attr('x', 25 + 20 + textWidth / 2)
+            .attr('y', -10)
+            .style("text-anchor", "middle")
+            .text(textInBox);
+        })
+        .on("mouseout", function() {
+          // Remove the info text on mouse out.
+          d3.select(this).select('text.introText').remove();
+          d3.select(this).select('text.info').remove();
+          d3.select(this).select('rect.info').remove();
+        });
 
       node.filter( function( d ) { return d.type == "T"; } )
         .append( "polygon" )
@@ -425,6 +468,7 @@ var TraceTree = function() {
       var _this = this;
       _this.tracetreehistory_seq++;
       _this.updateTracetreeHistory();
+      return _this.tracetreehistory_seq;
     },
 
     prevTracetree: function() {
@@ -433,9 +477,16 @@ var TraceTree = function() {
         _this.tracetreehistory_seq--;
         _this.updateTracetreeHistory();
       }
+      return _this.tracetreehistory_seq;
     },
 
-    getTracetreeHistoryFromServer: function() {
+    selectTracetreeByPacket: function(i) {
+      var _this = this;
+      _this.tracetreehistory_seq = i;
+      _this.updateTracetreeHistory();
+    },
+
+    getSelectedTracetreeHistoryFromServer: function() {
       var _this = this;
       d3.json(endpoint + '/maple/tracetreehistory/' + _this.tracetreehistory_seq)
         .get(function(err, data) {
@@ -455,21 +506,81 @@ var TraceTree = function() {
         });
     },
 
-    updateTracetreeHistory: function() {
+    constructPacketDropdown: function() {
+      var _this = this;
+      var dropdown = document.getElementById("packet-dropdown");
+      if (!dropdown) { return; }
+      while (dropdown.firstChild) {
+        dropdown.removeChild(dropdown.firstChild);
+      }
+      var blank = document.createElement("option");
+      blank.setAttribute("value", 0);
+      dropdown.appendChild(blank);
+      _this.packetList.map(function(packetInfo, i) {
+        var timestamp = packetInfo.timestamp;       
+        var packetType = '';
+        switch (packetInfo.packetJSON.frame.ETH_TYPE) {
+          case "0x0800":
+            packetType = "IPv4";
+            break;
+          case "0x0806":
+            packetType = "ARP";
+            break;
+          default:
+            packetType = parseInt(packetInfo.packetJSON.ETH_TYPE, 16).toString();
+        }
+        var item = document.createElement("option");
+        item.innerHTML = (i+1).toString() + "       " + timestamp + "   (" + packetType + ")";
+        item.setAttribute('value', i);
+        dropdown.appendChild(item);
+      });
+    },
+
+    initTracetreeHistory: function() {
       var _this = this;
       d3.json(endpoint + '/maple/tracetreehistory_seq')
         .get(function(err, data) {
-          if (_this.tracetreehistory_seq == -1) {
-            if (!err && data['seq_num'] > 0) {
-              _this.tracetreehistory_seq = data['seq_num'] - 1;
-            } else {
-              _this.tracetreehistory_seq = 0;
+          if (!err && data['seq_num'] > 0) {
+            _this.tracetreehistory_seq = data['seq_num'] - 1;
+            _this.num_tracetrees = data['seq_num'];
+          } else {
+            _this.tracetreehistory_seq = 0;
+          }
+          _this.getSelectedTracetreeHistoryFromServer();
+          document.getElementById("tracetreehistory-seq").innerHTML = _this.tracetreehistory_seq + 1;
+          document.getElementById("num-tracetrees").innerHTML = _this.num_tracetrees;      
+        });
+
+      d3.json(endpoint + '/maple/packetlist')
+        .get(function(err, data) {
+          if (!err) {
+            _this.packetList = data['packet_list'];
+            _this.constructPacketDropdown();
+          }
+        });
+    },
+
+    updateTracetreeHistory: function() {
+      var _this = this;
+      if (_this.tracetreehistory_seq == -1) {
+        _this.initTracetreeHistory();
+      }
+      d3.json(endpoint + '/maple/tracetreehistory_seq')
+        .get(function(err, data) {
+          if (!err) {
+            var morePackets = _this.num_tracetrees < data["seq_num"];
+            _this.num_tracetrees = data['seq_num'];
+            if (morePackets) {
+              d3.json(endpoint + '/maple/packetlist')
+                .get(function(err2, data2) {
+                  if (!err2) {
+                    _this.packetList = data2['packet_list'];
+                    _this.constructPacketDropdown();
+                  }
+                });
             }
           }
-          if (!err) {
-            _this.num_tracetrees = data['seq_num'];
-          }
-          _this.getTracetreeHistoryFromServer();
+          _this.getSelectedTracetreeHistoryFromServer();
           document.getElementById("tracetreehistory-seq").innerHTML = _this.tracetreehistory_seq + 1;
           document.getElementById("num-tracetrees").innerHTML = _this.num_tracetrees;
         });

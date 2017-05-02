@@ -139,8 +139,12 @@ devopen.controller(
     '$scope',
     '$http',
     function($scope, $http) {
-      $scope.next = function() { TraceTree.nextTracetree(); };
-      $scope.prev = function() { TraceTree.prevTracetree(); };
+      $scope.data = {}
+
+      $scope.next = function() { $scope.data.selection = TraceTree.nextTracetree().toString(); };
+      $scope.prev = function() { $scope.data.selection = TraceTree.prevTracetree().toString(); };
+
+      $scope.change_packet = function(item) { TraceTree.selectTracetreeByPacket(parseInt(item)); };      
 
       $scope.hide_next = function() {
         if (TraceTree.tracetreehistory_seq == -1 || !TraceTree.num_tracetrees || TraceTree.tracetreehistory_seq == TraceTree.num_tracetrees - 1) {
