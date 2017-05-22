@@ -9,6 +9,7 @@ var lib_api = require('./lib/test');
 
 var app = express();
 var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 module.exports = function(controller, port) {
   var cfg = controller;
@@ -22,6 +23,21 @@ module.exports = function(controller, port) {
     res.writeHead(302, {Location: '/index.html'});
     res.end();
   });
+
+  io.set("origins", "*:*");
+  io.on('connection', function(socket){
+      console.log("Socket Connected");
+  });
+
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+    res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Origin, Accept, X-Requested-With, Content-Type, Access-Controller-Requested-Method, Accept-Control-Request-Headers");
+    next();
+  });
+
+
+
 
   // Basic Controller Information
   app.get('/test/info', api.info);
@@ -51,6 +67,20 @@ module.exports = function(controller, port) {
 
   // Network API
   app.get('/test/network/topology', api.network.getTopology);
+
+  // Integrated with visual programming API
+  app.get('/test/visual/linenumber', function(req, res){
+    res.send("GET request");
+    var linenumber = req.query.line;
+    if(linenumber === undefined) return;
+    if(typeof(linenumber) === "string"){
+        linenumber = parseInt(linenumber);
+    }
+    console.log(linenumber);
+    io.emit("lineNumber", linenumber);
+    console.log("sent");
+    return;
+  });
 
   server.port = port || 9090;
   server.listen(server.port, function() {

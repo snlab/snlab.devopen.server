@@ -6,6 +6,7 @@ var request = require('request');
 var sqlite3 = require('../../node_modules/sqlite3');
 var Client = require('../../node_modules/ssh2').Client;
 var fuuid = require('./fast-uuid.js');
+var cors = require('cors');
 
 var portalApp = require('./portalApp.js');
 

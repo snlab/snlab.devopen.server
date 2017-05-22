@@ -379,6 +379,17 @@ var TraceTree = function() {
           d3.select(this).select('text.introText').remove();
           d3.select(this).select('text.info').remove();
           d3.select(this).select('rect.info').remove();
+        })
+        .on("click", function(d) {
+            if(!d.debuginfo) {return; }
+            var textInBox = d.debuginfo.linenumber;
+            $.ajax({
+                url: "/test/visual/linenumber",
+                type: "get",
+                data: {
+                    line: textInBox
+                }
+            });
         });
 
       node.filter( function( d ) { return d.type == "T"; } )
